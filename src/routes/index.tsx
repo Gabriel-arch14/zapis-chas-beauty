@@ -1,8 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { Calendar, MousePointerClick, Sparkles, Heart } from "lucide-react";
+import { Calendar, MousePointerClick, Sparkles, Heart, MapPin, X, ExternalLink } from "lucide-react";
+
+const MAP_SRC =
+  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2934.1!2d25.315322!3d42.872214!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDLCsDUyJzE5LjkiTiAyNcKwMTgnNTUuMiJF!5e0!3m2!1sbg!2sbg!4v1620000000000!5m2!1sbg!2sbg";
+const MAPS_LINK = "https://maps.google.com/?q=42.872214,25.315322";
 
 export const Route = createFileRoute("/")({
   head: () => ({
