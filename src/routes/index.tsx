@@ -1,8 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { Calendar, MousePointerClick, Sparkles, Heart } from "lucide-react";
+import { Calendar, MousePointerClick, Sparkles, Heart, MapPin, X, ExternalLink } from "lucide-react";
+
+const MAP_SRC =
+  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2934.1!2d25.315322!3d42.872214!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDLCsDUyJzE5LjkiTiAyNcKwMTgnNTUuMiJF!5e0!3m2!1sbg!2sbg!4v1620000000000!5m2!1sbg!2sbg";
+const MAPS_LINK = "https://maps.google.com/?q=42.872214,25.315322";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,9 +22,25 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const [mapOpen, setMapOpen] = useState(false);
+
+  useEffect(() => {
+    if (!mapOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMapOpen(false);
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [mapOpen]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <SiteHeader />
+
+
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-hero">
@@ -86,6 +107,85 @@ function Index() {
           </div>
         </div>
       </section>
+
+      {/* Map / Location */}
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-secondary/40 to-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <h2 className="text-3xl sm:text-4xl font-display font-semibold text-mauve">Къде ни намерите?</h2>
+            <p className="mt-3 text-muted-foreground">ул. Възраждане 4, Габрово</p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <button
+              type="button"
+              onClick={() => setMapOpen(true)}
+              aria-label="Отвори картата на цял екран"
+              className="group relative block w-full overflow-hidden rounded-2xl shadow-card border border-primary/20 transition-smooth hover:shadow-glow hover:-translate-y-0.5"
+              style={{ borderRadius: "16px" }}
+            >
+              <iframe
+                src={MAP_SRC}
+                title="Карта — ул. Възраждане 4, Габрово"
+                className="w-full pointer-events-none"
+                style={{ height: "300px", border: 0 }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+              <span className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-smooth" />
+              <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1.5 text-xs text-mauve shadow-soft">
+                <ExternalLink className="h-3.5 w-3.5" /> Кликни за уголемяване
+              </span>
+            </button>
+
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl bg-card p-5 border border-border/60 shadow-soft">
+              <div className="flex items-center gap-3 text-mauve">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary">
+                  <MapPin className="h-5 w-5" />
+                </span>
+                <span className="font-medium">ул. Възраждане 4, Габрово</span>
+              </div>
+              <Button asChild className="rounded-full bg-gradient-primary hover:opacity-90 transition-smooth">
+                <a href={MAPS_LINK} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Отвори в Google Maps
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {mapOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 sm:p-8 animate-in fade-in"
+          onClick={() => setMapOpen(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            type="button"
+            onClick={() => setMapOpen(false)}
+            aria-label="Затвори картата"
+            className="absolute top-4 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white text-mauve shadow-glow hover:bg-primary hover:text-primary-foreground transition-smooth"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <div
+            className="w-full h-full max-w-6xl max-h-[90vh] overflow-hidden rounded-2xl shadow-glow border border-white/20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <iframe
+              src={MAP_SRC}
+              title="Карта — ул. Възраждане 4, Габрово (увеличена)"
+              className="w-full h-full"
+              style={{ border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </div>
+      )}
 
       <SiteFooter />
     </div>
