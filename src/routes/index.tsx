@@ -22,9 +22,25 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const [mapOpen, setMapOpen] = useState(false);
+
+  useEffect(() => {
+    if (!mapOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMapOpen(false);
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [mapOpen]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <SiteHeader />
+
+
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-hero">
