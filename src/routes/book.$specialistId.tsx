@@ -142,7 +142,7 @@ function BookPage() {
         booking_date: toDateKey(date),
         booking_time: time,
       },
-    }).catch((e) => console.error("Webhook dispatch failed:", e));
+    }).catch((e: unknown) => console.error("Webhook dispatch failed:", e));
     const params = new URLSearchParams({
       specialist: specialist?.name ?? "",
       service: selectedService?.name ?? "",
