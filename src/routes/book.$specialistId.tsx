@@ -131,6 +131,17 @@ function BookPage() {
       toast.error(error.code === "23505" ? "Този час вече е зает. Моля, изберете друг." : "Възникна грешка. Опитайте отново.");
       return;
     }
+    sendBookingWebhooks({
+      data: {
+        client_name: parsed.data.client_name,
+        client_email: parsed.data.client_email,
+        client_phone: parsed.data.client_phone,
+        specialist_name: specialist?.name ?? "",
+        service_name: selectedService?.name ?? "",
+        booking_date: toDateKey(date),
+        booking_time: time,
+      },
+    }).catch((e) => console.error("Webhook dispatch failed:", e));
     const params = new URLSearchParams({
       specialist: specialist?.name ?? "",
       service: selectedService?.name ?? "",
