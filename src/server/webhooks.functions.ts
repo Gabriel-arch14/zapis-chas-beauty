@@ -14,7 +14,7 @@ const payloadSchema = z.object({
 export const sendBookingWebhooks = createServerFn({ method: "POST" })
   .inputValidator((input) => payloadSchema.parse(input))
   .handler(async ({ data }) => {
-    const urls = [process.env.WEBHOOK_URL_1, process.env.WEBHOOK_URL_2].filter(
+    const urls = [process.env.WEBHOOK_URL1, process.env.WEBHOOK_URL2].filter(
       (u): u is string => !!u,
     );
 
