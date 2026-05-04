@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { sendBookingWebhooks } from "@/server/webhooks.functions";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
@@ -131,6 +132,17 @@ function BookPage() {
       toast.error(error.code === "23505" ? "Този час вече е зает. Моля, изберете друг." : "Възникна грешка. Опитайте отново.");
       return;
     }
+    sendBookingWebhooks({
+      data: {
+        client_name: parsed.data.client_name,
+        client_email: parsed.data.client_email,
+        client_phone: parsed.data.client_phone,
+        specialist_name: specialist?.name ?? "",
+        service_name: selectedService?.name ?? "",
+        booking_date: toDateKey(date),
+        booking_time: time,
+      },
+    }).catch((e: unknown) => console.error("Webhook dispatch failed:", e));
     const params = new URLSearchParams({
       specialist: specialist?.name ?? "",
       service: selectedService?.name ?? "",
