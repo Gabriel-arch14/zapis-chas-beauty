@@ -181,7 +181,7 @@ function Index() {
             >
               <iframe
                 src={MAP_SRC}
-                title="Карта — ул. Възраждане 4, Габрово"
+                title={`Карта — ${ADDRESS}`}
                 className="w-full pointer-events-none"
                 style={{ height: "300px", border: 0 }}
                 loading="lazy"
