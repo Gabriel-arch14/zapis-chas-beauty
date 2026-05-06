@@ -167,6 +167,8 @@ function BookPage() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
   const canNext = (step === 1 && serviceId) || (step === 2 && date) || (step === 3 && time);
 
