@@ -53,13 +53,13 @@ function Index() {
           <div className="max-w-3xl mx-auto text-center">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 backdrop-blur text-sm text-mauve shadow-soft mb-6 animate-in fade-in slide-in-from-bottom-2">
               <Heart className="h-3.5 w-3.5 fill-primary text-primary" />
-              Онлайн резервации за салони за красота
+              Маникюр & Педикюр студио в Габрово
             </span>
             <h1 className="text-4xl sm:text-6xl font-display font-semibold text-mauve leading-tight animate-in fade-in slide-in-from-bottom-4">
-              Запиши час при любимия<br />си специалист
+              Ruseva Nails Studio
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground animate-in fade-in slide-in-from-bottom-6">
-              Бързо, лесно, без телефонни обаждания.
+              Професионален маникюр и педикюр в сърцето на Габрово. Запишете час онлайн — бързо и лесно!
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button asChild size="lg" className="h-14 px-8 text-base shadow-glow bg-gradient-primary hover:opacity-90 transition-smooth rounded-full">
