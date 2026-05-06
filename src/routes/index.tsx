@@ -232,7 +232,7 @@ function Index() {
           >
             <iframe
               src={MAP_SRC}
-              title="Карта — ул. Възраждане 4, Габрово (увеличена)"
+              title={`Карта — ${ADDRESS} (увеличена)`}
               className="w-full h-full"
               style={{ border: 0 }}
               loading="lazy"
