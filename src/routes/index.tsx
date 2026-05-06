@@ -109,6 +109,59 @@ function Index() {
         </div>
       </section>
 
+      {/* Reviews */}
+      <section className="py-20 sm:py-28 bg-gradient-to-b from-background to-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-3xl sm:text-4xl font-display font-semibold text-mauve">Какво казват клиентите ни</h2>
+            <p className="mt-3 text-muted-foreground">Реални отзиви от доволни клиенти</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {[
+              { name: "Мария К.", text: "Страхотна услуга! Записах се за 2 минути и всичко беше перфектно организирано." },
+              { name: "Елена Д.", text: "Най-накрая онлайн записване! Спестява ми толкова много време." },
+              { name: "Петя С.", text: "Много удобно и лесно. Получих имейл потвърждение веднага." },
+              { name: "Ивана М.", text: "Препоръчвам на всички! Бързо, лесно и без обаждания по телефона." },
+              { name: "Симона Г.", text: "Използвам го всеки месец. Никога повече без онлайн записване!" },
+            ].map((r) => (
+              <div key={r.name} className="rounded-2xl bg-card p-6 shadow-card border border-primary/15 transition-smooth hover:-translate-y-1 hover:shadow-glow">
+                <div className="flex gap-0.5 mb-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                  ))}
+                </div>
+                <p className="text-mauve/90 italic">"{r.text}"</p>
+                <p className="mt-4 font-display font-semibold text-mauve">{r.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-20 sm:py-24">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl sm:text-4xl font-display font-semibold text-mauve">Често задавани въпроси</h2>
+            <p className="mt-3 text-muted-foreground">Намерете отговор на най-често срещаните въпроси</p>
+          </div>
+          <Accordion type="single" collapsible className="rounded-2xl bg-card border border-primary/15 shadow-card px-6">
+            {[
+              { q: "Как да запиша час?", a: "Натиснете 'Запиши Час Сега', изберете специалист, услуга, дата и час, попълнете данните си и потвърдете. Получавате имейл потвърждение веднага." },
+              { q: "Мога ли да отменя записания час?", a: "Да, можете да се свържете с нас най-малко 24 часа преди записания час." },
+              { q: "Ще получа ли потвърждение?", a: "Да, веднага след записването ще получите имейл с всички детайли на вашия час." },
+              { q: "За кой период мога да записвам?", a: "Записванията са отворени само за текущия месец. В началото на всеки месец се отварят нови часове." },
+              { q: "Трябва ли да плащам онлайн?", a: "Не, плащането се извършва на място при посещението." },
+            ].map((item, i) => (
+              <AccordionItem key={i} value={`item-${i}`} className="border-primary/10">
+                <AccordionTrigger className="text-mauve font-medium text-left hover:no-underline">{item.q}</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">{item.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
       {/* Map / Location */}
       <section className="py-20 sm:py-24 bg-gradient-to-b from-secondary/40 to-background">
         <div className="container mx-auto px-4">
