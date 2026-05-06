@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { Calendar, MousePointerClick, Sparkles, Heart, MapPin, X, ExternalLink } from "lucide-react";
+import { Calendar, MousePointerClick, Sparkles, Heart, MapPin, X, ExternalLink, Star } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const MAP_SRC =
   "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2934.1!2d25.315322!3d42.872214!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDLCsDUyJzE5LjkiTiAyNcKwMTgnNTUuMiJF!5e0!3m2!1sbg!2sbg!4v1620000000000!5m2!1sbg!2sbg";
@@ -105,6 +106,59 @@ function Index() {
               <Link to="/specialists">Виж нашите специалисти</Link>
             </Button>
           </div>
+        </div>
+      </section>
+
+      {/* Reviews */}
+      <section className="py-20 sm:py-28 bg-gradient-to-b from-background to-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-3xl sm:text-4xl font-display font-semibold text-mauve">Какво казват клиентите ни</h2>
+            <p className="mt-3 text-muted-foreground">Реални отзиви от доволни клиенти</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {[
+              { name: "Мария К.", text: "Страхотна услуга! Записах се за 2 минути и всичко беше перфектно организирано." },
+              { name: "Елена Д.", text: "Най-накрая онлайн записване! Спестява ми толкова много време." },
+              { name: "Петя С.", text: "Много удобно и лесно. Получих имейл потвърждение веднага." },
+              { name: "Ивана М.", text: "Препоръчвам на всички! Бързо, лесно и без обаждания по телефона." },
+              { name: "Симона Г.", text: "Използвам го всеки месец. Никога повече без онлайн записване!" },
+            ].map((r) => (
+              <div key={r.name} className="rounded-2xl bg-card p-6 shadow-card border border-primary/15 transition-smooth hover:-translate-y-1 hover:shadow-glow">
+                <div className="flex gap-0.5 mb-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                  ))}
+                </div>
+                <p className="text-mauve/90 italic">"{r.text}"</p>
+                <p className="mt-4 font-display font-semibold text-mauve">{r.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-20 sm:py-24">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl sm:text-4xl font-display font-semibold text-mauve">Често задавани въпроси</h2>
+            <p className="mt-3 text-muted-foreground">Намерете отговор на най-често срещаните въпроси</p>
+          </div>
+          <Accordion type="single" collapsible className="rounded-2xl bg-card border border-primary/15 shadow-card px-6">
+            {[
+              { q: "Как да запиша час?", a: "Натиснете 'Запиши Час Сега', изберете специалист, услуга, дата и час, попълнете данните си и потвърдете. Получавате имейл потвърждение веднага." },
+              { q: "Мога ли да отменя записания час?", a: "Да, можете да се свържете с нас най-малко 24 часа преди записания час." },
+              { q: "Ще получа ли потвърждение?", a: "Да, веднага след записването ще получите имейл с всички детайли на вашия час." },
+              { q: "За кой период мога да записвам?", a: "Записванията са отворени само за текущия месец. В началото на всеки месец се отварят нови часове." },
+              { q: "Трябва ли да плащам онлайн?", a: "Не, плащането се извършва на място при посещението." },
+            ].map((item, i) => (
+              <AccordionItem key={i} value={`item-${i}`} className="border-primary/10">
+                <AccordionTrigger className="text-mauve font-medium text-left hover:no-underline">{item.q}</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">{item.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 
