@@ -159,8 +159,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     <div className="min-h-screen flex flex-col">
       <SiteHeader />
       <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="font-display text-3xl text-mauve">Админ панел</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <h1 className="font-display text-2xl sm:text-3xl text-mauve">Админ панел</h1>
           <Button variant="outline" onClick={onLogout} className="rounded-full"><LogOut className="mr-2 h-4 w-4" /> Изход</Button>
         </div>
 
