@@ -198,7 +198,7 @@ function Index() {
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary">
                   <MapPin className="h-5 w-5" />
                 </span>
-                <span className="font-medium">ул. Възраждане 4, Габрово</span>
+                <span className="font-medium">{ADDRESS}</span>
               </div>
               <Button asChild className="rounded-full bg-gradient-primary hover:opacity-90 transition-smooth">
                 <a href={MAPS_LINK} target="_blank" rel="noopener noreferrer">
