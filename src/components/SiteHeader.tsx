@@ -9,7 +9,7 @@ export function SiteHeader() {
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-primary shadow-soft transition-smooth group-hover:scale-105">
             <Sparkles className="h-4 w-4 text-primary-foreground" />
           </span>
-          <span className="font-display text-base sm:text-xl font-semibold text-mauve truncate">Запиши Час</span>
+          <span className="font-display text-base sm:text-xl font-semibold text-mauve truncate">Ruseva Nails Studio</span>
         </Link>
         <nav className="flex items-center gap-0.5 sm:gap-2 text-xs sm:text-sm shrink-0">
           <Link to="/" className="px-2 sm:px-3 py-2 rounded-md hover:bg-secondary transition-smooth" activeOptions={{ exact: true }} activeProps={{ className: "px-2 sm:px-3 py-2 rounded-md bg-secondary text-mauve font-medium" }}>
