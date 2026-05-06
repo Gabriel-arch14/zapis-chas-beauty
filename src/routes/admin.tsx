@@ -165,11 +165,11 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         </div>
 
         <Tabs defaultValue="bookings">
-          <TabsList className="bg-secondary">
-            <TabsTrigger value="bookings">Резервации</TabsTrigger>
-            <TabsTrigger value="specialists">Специалисти</TabsTrigger>
-            <TabsTrigger value="services">Услуги</TabsTrigger>
-            <TabsTrigger value="blocked">Блокирани часове</TabsTrigger>
+          <TabsList className="bg-secondary flex w-full overflow-x-auto h-auto flex-wrap sm:flex-nowrap">
+            <TabsTrigger value="bookings" className="flex-1 min-w-fit text-xs sm:text-sm">Резервации</TabsTrigger>
+            <TabsTrigger value="specialists" className="flex-1 min-w-fit text-xs sm:text-sm">Специалисти</TabsTrigger>
+            <TabsTrigger value="services" className="flex-1 min-w-fit text-xs sm:text-sm">Услуги</TabsTrigger>
+            <TabsTrigger value="blocked" className="flex-1 min-w-fit text-xs sm:text-sm">Блокирани</TabsTrigger>
           </TabsList>
           <TabsContent value="bookings"><BookingsTab /></TabsContent>
           <TabsContent value="specialists"><SpecialistsTab /></TabsContent>
