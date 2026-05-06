@@ -241,13 +241,15 @@ function BookPage() {
           {step === 2 && (
             <div>
               <h2 className="font-display text-2xl text-mauve mb-4">Изберете дата</h2>
+              <p className="text-sm text-muted-foreground mb-4 text-center">Записванията са отворени само за текущия месец</p>
               <div className="flex justify-center">
                 <Calendar
                   mode="single"
                   selected={date}
                   onSelect={(d) => { setDate(d); setTime(null); }}
-                  disabled={(d) => d < today || blockedDates.has(toDateKey(d))}
-                  className={cn("p-3 pointer-events-auto rounded-xl border bg-white")}
+                  month={monthStart}
+                  disabled={(d) => d < today || d > monthEnd || blockedDates.has(toDateKey(d))}
+                  className={cn("p-3 pointer-events-auto rounded-xl border bg-white max-w-full")}
                 />
               </div>
             </div>
