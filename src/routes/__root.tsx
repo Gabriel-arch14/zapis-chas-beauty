@@ -29,10 +29,10 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Запиши Час — Резервации при специалист онлайн" },
-      { name: "description", content: "Запишете час при любимия си козметик, маникюрист или масажист — бързо, лесно, без телефонни обаждания." },
-      { property: "og:title", content: "Запиши Час" },
-      { property: "og:description", content: "Онлайн резервации за салони за красота." },
+      { title: "Ruseva Nails Studio — Маникюр и педикюр в Габрово" },
+      { name: "description", content: "Професионален маникюр и педикюр в сърцето на Габрово. Запишете час онлайн — бързо и лесно!" },
+      { property: "og:title", content: "Ruseva Nails Studio" },
+      { property: "og:description", content: "Професионален маникюр и педикюр в сърцето на Габрово." },
       { property: "og:type", content: "website" },
     ],
     links: [

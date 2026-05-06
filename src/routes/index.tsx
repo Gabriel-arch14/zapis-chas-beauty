@@ -6,17 +6,18 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Calendar, MousePointerClick, Sparkles, Heart, MapPin, X, ExternalLink, Star } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
+const ADDRESS = 'ул. "Христо Смирненски" 17, Габрово';
 const MAP_SRC =
-  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2934.1!2d25.315322!3d42.872214!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDLCsDUyJzE5LjkiTiAyNcKwMTgnNTUuMiJF!5e0!3m2!1sbg!2sbg!4v1620000000000!5m2!1sbg!2sbg";
-const MAPS_LINK = "https://maps.google.com/?q=42.872214,25.315322";
+  "https://www.google.com/maps?q=42.8712,25.3187&z=16&output=embed";
+const MAPS_LINK = "https://maps.google.com/?q=42.8712,25.3187";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Запиши Час — Онлайн резервации в салон за красота" },
-      { name: "description", content: "Запишете час при любимия си специалист — маникюр, козметика, масаж. Бързо, лесно, без обаждания." },
-      { property: "og:title", content: "Запиши Час" },
-      { property: "og:description", content: "Онлайн резервации в салон за красота." },
+      { title: "Ruseva Nails Studio — Маникюр и педикюр в Габрово" },
+      { name: "description", content: "Професионален маникюр и педикюр в сърцето на Габрово. Запишете час онлайн — бързо и лесно!" },
+      { property: "og:title", content: "Ruseva Nails Studio" },
+      { property: "og:description", content: "Професионален маникюр и педикюр в сърцето на Габрово." },
     ],
   }),
   component: Index,
@@ -52,13 +53,13 @@ function Index() {
           <div className="max-w-3xl mx-auto text-center">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 backdrop-blur text-sm text-mauve shadow-soft mb-6 animate-in fade-in slide-in-from-bottom-2">
               <Heart className="h-3.5 w-3.5 fill-primary text-primary" />
-              Онлайн резервации за салони за красота
+              Маникюр & Педикюр студио в Габрово
             </span>
             <h1 className="text-4xl sm:text-6xl font-display font-semibold text-mauve leading-tight animate-in fade-in slide-in-from-bottom-4">
-              Запиши час при любимия<br />си специалист
+              Ruseva Nails Studio
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground animate-in fade-in slide-in-from-bottom-6">
-              Бързо, лесно, без телефонни обаждания.
+              Професионален маникюр и педикюр в сърцето на Габрово. Запишете час онлайн — бързо и лесно!
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button asChild size="lg" className="h-14 px-8 text-base shadow-glow bg-gradient-primary hover:opacity-90 transition-smooth rounded-full">
@@ -167,7 +168,7 @@ function Index() {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-3xl sm:text-4xl font-display font-semibold text-mauve">Къде ни намерите?</h2>
-            <p className="mt-3 text-muted-foreground">ул. Възраждане 4, Габрово</p>
+            <p className="mt-3 text-muted-foreground">{ADDRESS}</p>
           </div>
 
           <div className="max-w-4xl mx-auto">
@@ -180,7 +181,7 @@ function Index() {
             >
               <iframe
                 src={MAP_SRC}
-                title="Карта — ул. Възраждане 4, Габрово"
+                title={`Карта — ${ADDRESS}`}
                 className="w-full pointer-events-none"
                 style={{ height: "300px", border: 0 }}
                 loading="lazy"
@@ -197,7 +198,7 @@ function Index() {
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary">
                   <MapPin className="h-5 w-5" />
                 </span>
-                <span className="font-medium">ул. Възраждане 4, Габрово</span>
+                <span className="font-medium">{ADDRESS}</span>
               </div>
               <Button asChild className="rounded-full bg-gradient-primary hover:opacity-90 transition-smooth">
                 <a href={MAPS_LINK} target="_blank" rel="noopener noreferrer">
@@ -231,7 +232,7 @@ function Index() {
           >
             <iframe
               src={MAP_SRC}
-              title="Карта — ул. Възраждане 4, Габрово (увеличена)"
+              title={`Карта — ${ADDRESS} (увеличена)`}
               className="w-full h-full"
               style={{ border: 0 }}
               loading="lazy"

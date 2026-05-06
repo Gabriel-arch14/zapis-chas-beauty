@@ -62,7 +62,11 @@ function SpecialistsPage() {
                         className="h-full w-full object-cover transition-smooth group-hover:scale-105"
                       />
                     ) : (
-                      <div className="h-full w-full bg-gradient-soft" />
+                      <div className="h-full w-full bg-gradient-soft flex items-center justify-center p-6 text-center">
+                        <span className="font-display text-2xl sm:text-3xl font-semibold text-mauve leading-tight">
+                          Ruseva Nails Studio
+                        </span>
+                      </div>
                     )}
                     <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
                     <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 text-xs font-medium text-mauve shadow-soft">
