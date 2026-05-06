@@ -14,10 +14,10 @@ const MAPS_LINK = "https://maps.google.com/?q=42.8712,25.3187";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Запиши Час — Онлайн резервации в салон за красота" },
-      { name: "description", content: "Запишете час при любимия си специалист — маникюр, козметика, масаж. Бързо, лесно, без обаждания." },
-      { property: "og:title", content: "Запиши Час" },
-      { property: "og:description", content: "Онлайн резервации в салон за красота." },
+      { title: "Ruseva Nails Studio — Маникюр и педикюр в Габрово" },
+      { name: "description", content: "Професионален маникюр и педикюр в сърцето на Габрово. Запишете час онлайн — бързо и лесно!" },
+      { property: "og:title", content: "Ruseva Nails Studio" },
+      { property: "og:description", content: "Професионален маникюр и педикюр в сърцето на Габрово." },
     ],
   }),
   component: Index,
