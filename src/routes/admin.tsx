@@ -367,7 +367,7 @@ function ServicesTab() {
         <Input placeholder="Име на услугата" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         <div className="grid grid-cols-2 gap-3">
           <div><Label className="text-xs">Времетраене (мин.)</Label><Input type="number" min={15} step={15} value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: parseInt(e.target.value) || 30 })} /></div>
-          <div><Label className="text-xs">Цена (лв.)</Label><Input type="number" min={0} step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} /></div>
+          <div><Label className="text-xs">Цена (лв.) — показва се в €</Label><Input type="number" min={0} step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} /></div>
         </div>
         <Button onClick={add} className="rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Добави</Button>
       </div>

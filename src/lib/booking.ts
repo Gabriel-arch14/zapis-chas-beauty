@@ -15,7 +15,9 @@ export function generateTimeSlots(start: string, end: string, stepMinutes = 30):
 
 export function formatBGN(price: number | string): string {
   const n = typeof price === "string" ? parseFloat(price) : price;
-  return `${n.toFixed(2)} лв.`;
+  // Convert BGN to EUR using the fixed rate (1 EUR = 1.95583 BGN)
+  const eur = n / 1.95583;
+  return `${eur.toFixed(2)} €`;
 }
 
 export function formatDateBG(date: Date | string): string {
