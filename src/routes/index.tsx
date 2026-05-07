@@ -5,6 +5,18 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Calendar, MousePointerClick, Sparkles, Heart, MapPin, X, ExternalLink, Star } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import gallery1 from "@/assets/gallery-1.png";
+import gallery2 from "@/assets/gallery-2.png";
+import gallery3 from "@/assets/gallery-3.png";
+
+const GALLERY_IMAGES = [
+  { src: gallery1, alt: "Маникюр със сребърен арт дизайн" },
+  { src: gallery2, alt: "Класически френски маникюр със златни акценти" },
+  { src: gallery3, alt: "Нежен розов френски маникюр" },
+  { src: gallery1, alt: "Nail art с метални детайли" },
+  { src: gallery2, alt: "Елегантен френски маникюр" },
+  { src: gallery3, alt: "Овален маникюр с фини линии" },
+];
 
 const ADDRESS = 'ул. "Христо Смирненски" 17, Габрово';
 const MAP_SRC =
