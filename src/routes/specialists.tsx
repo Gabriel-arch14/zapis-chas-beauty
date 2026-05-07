@@ -62,8 +62,8 @@ function SpecialistsPage() {
                         className="h-full w-full object-cover transition-smooth group-hover:scale-105"
                       />
                     ) : (
-                      <div className="h-full w-full bg-gradient-soft flex items-center justify-center p-6 text-center">
-                        <span className="font-display text-2xl sm:text-3xl font-semibold text-mauve leading-tight">
+                      <div className="h-full w-full bg-secondary flex items-center justify-center p-6 text-center">
+                        <span className="font-display text-2xl sm:text-3xl font-semibold text-foreground leading-tight">
                           Ruseva Nails Studio
                         </span>
                       </div>
@@ -76,7 +76,7 @@ function SpecialistsPage() {
                   <div className="p-6 flex flex-col flex-1">
                     <h2 className="text-xl font-display font-semibold text-mauve">{s.name}</h2>
                     {s.bio && <p className="mt-2 text-sm text-muted-foreground line-clamp-3 flex-1">{s.bio}</p>}
-                    <Button asChild className="mt-5 w-full bg-gradient-primary hover:opacity-90 transition-smooth rounded-full">
+                    <Button asChild className="mt-5 w-full rounded-none transition-smooth">
                       <Link to="/book/$specialistId" params={{ specialistId: s.id }}>
                         <CalendarPlus className="mr-2 h-4 w-4" />
                         Запази Час

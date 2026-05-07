@@ -322,12 +322,12 @@ function BookPage() {
             <Button
               onClick={() => setStep((s) => s + 1)}
               disabled={!canNext}
-              className="rounded-full bg-gradient-primary hover:opacity-90"
+              className="rounded-none"
             >
               Напред <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
-            <Button onClick={handleSubmit} disabled={submitting} className="rounded-full bg-gradient-primary hover:opacity-90">
+            <Button onClick={handleSubmit} disabled={submitting} className="rounded-none">
               {submitting ? "Записване..." : "Потвърди резервацията"}
             </Button>
           )}
