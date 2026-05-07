@@ -82,7 +82,6 @@ function Index() {
         </div>
       </section>
 
-      {/* How it works */}
       {/* Gallery */}
       <section className="py-20 sm:py-28 border-b border-border bg-background">
         <div className="container mx-auto px-4">
