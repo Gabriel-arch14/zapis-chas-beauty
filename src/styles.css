@@ -149,4 +149,12 @@
   .text-mauve { color: var(--foreground); }
   .text-gold { color: var(--accent); }
   .bg-rose-soft { background-color: var(--accent); }
+  .animate-marquee {
+    animation: marquee 50s linear infinite;
+  }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
