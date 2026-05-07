@@ -5,6 +5,18 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Calendar, MousePointerClick, Sparkles, Heart, MapPin, X, ExternalLink, Star } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import gallery1 from "@/assets/gallery-1.png";
+import gallery2 from "@/assets/gallery-2.png";
+import gallery3 from "@/assets/gallery-3.png";
+
+const GALLERY_IMAGES = [
+  { src: gallery1, alt: "Маникюр със сребърен арт дизайн" },
+  { src: gallery2, alt: "Класически френски маникюр със златни акценти" },
+  { src: gallery3, alt: "Нежен розов френски маникюр" },
+  { src: gallery1, alt: "Nail art с метални детайли" },
+  { src: gallery2, alt: "Елегантен френски маникюр" },
+  { src: gallery3, alt: "Овален маникюр с фини линии" },
+];
 
 const ADDRESS = 'ул. "Христо Смирненски" 17, Габрово';
 const MAP_SRC =
@@ -66,6 +78,59 @@ function Index() {
                 </Link>
               </Button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery */}
+      <section className="py-20 sm:py-28 border-b border-border bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-3xl sm:text-4xl font-display font-semibold text-foreground">
+              Избери своята визия
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Разгледайте част от нашите маникюр и педикюр визии
+            </p>
+          </div>
+
+          <div
+            className="group/marquee relative overflow-hidden"
+            style={{
+              maskImage:
+                "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
+              WebkitMaskImage:
+                "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
+            }}
+          >
+            <div className="flex gap-5 sm:gap-6 w-max animate-marquee group-hover/marquee:[animation-play-state:paused]">
+              {[...GALLERY_IMAGES, ...GALLERY_IMAGES].map((img, i) => (
+                <figure
+                  key={i}
+                  className="shrink-0 overflow-hidden rounded-md border border-border bg-card transition-smooth hover:-translate-y-1 hover:shadow-card"
+                  style={{
+                    width: i % 3 === 1 ? "320px" : i % 3 === 2 ? "260px" : "290px",
+                  }}
+                >
+                  <img
+                    src={img.src}
+                    alt={img.alt}
+                    loading="lazy"
+                    className="h-64 sm:h-72 w-full object-cover transition-transform duration-700 ease-out hover:scale-[1.03]"
+                  />
+                </figure>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <Button
+              asChild
+              size="lg"
+              className="rounded-none h-12 px-8 bg-foreground text-background hover:bg-foreground/85 transition-smooth"
+            >
+              <Link to="/specialists">Към галерията</Link>
+            </Button>
           </div>
         </div>
       </section>
