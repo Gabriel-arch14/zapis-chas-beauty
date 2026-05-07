@@ -60,7 +60,62 @@ function AdminPage() {
   if (!session) return <AuthForm />;
   if (!isAdmin) return <NotAdmin email={session.user.email ?? ""} userId={session.user.id} />;
 
+  const mustChange = !session.user.user_metadata?.password_changed;
+  if (mustChange) return <ChangePasswordScreen email={session.user.email ?? ""} />;
+
   return <AdminDashboard onLogout={() => supabase.auth.signOut()} />;
+}
+
+function ChangePasswordScreen({ email }: { email: string }) {
+  const [pwd, setPwd] = useState("");
+  const [pwd2, setPwd2] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pwd.length < 8) { toast.error("Паролата трябва да е поне 8 символа"); return; }
+    if (pwd !== pwd2) { toast.error("Паролите не съвпадат"); return; }
+    setBusy(true);
+    const { error } = await supabase.auth.updateUser({
+      password: pwd,
+      data: { password_changed: true, password_changed_at: new Date().toISOString() },
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Паролата е променена успешно. Изпратено е потвърждение на " + email);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <SiteHeader />
+      <main className="flex-1 container mx-auto px-4 py-12 max-w-md">
+        <div className="rounded-2xl bg-card shadow-card border border-border/50 p-8">
+          <ShieldAlert className="h-10 w-10 text-primary mb-3" />
+          <h1 className="font-display text-2xl text-mauve mb-1">Смяна на парола</h1>
+          <p className="text-sm text-muted-foreground mb-6">
+            Използвате временна парола. От съображения за сигурност, моля задайте нова, преди да продължите.
+          </p>
+          <form onSubmit={submit} className="space-y-4">
+            <div>
+              <Label htmlFor="np">Нова парола</Label>
+              <Input id="np" type="password" required minLength={8} value={pwd} onChange={(e) => setPwd(e.target.value)} className="mt-1.5" />
+            </div>
+            <div>
+              <Label htmlFor="np2">Повторете паролата</Label>
+              <Input id="np2" type="password" required minLength={8} value={pwd2} onChange={(e) => setPwd2(e.target.value)} className="mt-1.5" />
+            </div>
+            <Button type="submit" disabled={busy} className="w-full rounded-full bg-gradient-primary hover:opacity-90">
+              {busy ? "Запазване..." : "Запази нова парола"}
+            </Button>
+          </form>
+          <button onClick={() => supabase.auth.signOut()} className="mt-4 text-sm text-muted-foreground hover:underline w-full text-center">
+            Изход
+          </button>
+        </div>
+      </main>
+      <SiteFooter />
+    </div>
+  );
 }
 
 /* ---------- Auth ---------- */
