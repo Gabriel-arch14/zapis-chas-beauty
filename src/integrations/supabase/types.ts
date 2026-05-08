@@ -50,6 +50,8 @@ export type Database = {
         Row: {
           booking_date: string
           booking_time: string
+          cancel_token: string
+          cancelled_at: string | null
           client_email: string
           client_name: string
           client_phone: string
@@ -62,6 +64,8 @@ export type Database = {
         Insert: {
           booking_date: string
           booking_time: string
+          cancel_token?: string
+          cancelled_at?: string | null
           client_email: string
           client_name: string
           client_phone: string
@@ -74,6 +78,8 @@ export type Database = {
         Update: {
           booking_date?: string
           booking_time?: string
+          cancel_token?: string
+          cancelled_at?: string | null
           client_email?: string
           client_name?: string
           client_phone?: string
@@ -191,6 +197,32 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_booking_by_token: {
+        Args: { _token: string }
+        Returns: {
+          booking_date: string
+          booking_time: string
+          cancelled_at: string
+          client_email: string
+          client_name: string
+          client_phone: string
+          id: string
+          service_name: string
+          specialist_name: string
+          status: string
+          was_already_cancelled: boolean
+        }[]
+      }
+      get_booking_status: {
+        Args: { _id: string }
+        Returns: {
+          booking_date: string
+          booking_time: string
+          cancelled_at: string
+          id: string
+          status: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
