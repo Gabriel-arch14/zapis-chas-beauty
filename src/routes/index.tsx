@@ -175,7 +175,7 @@ function Index() {
 
             {/* Mobile single image */}
             <div className="lg:hidden">
-              <img src={gallery2} alt="Маникюр в Ruseva Nails Studio" className="w-full h-72 object-cover border border-border" />
+              <img src={gallery2} alt="Маникюр в Ruseva Nails Studio" loading="eager" fetchPriority="high" decoding="async" className="w-full h-72 object-cover border border-border" />
             </div>
           </div>
         </div>
