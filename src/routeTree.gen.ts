@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SpecialistsRouteImport } from './routes/specialists'
 import { Route as ConfirmationRouteImport } from './routes/confirmation'
+import { Route as CancelRouteImport } from './routes/cancel'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BookSpecialistIdRouteImport } from './routes/book.$specialistId'
+import { Route as ApiPublicBookingStatusIdRouteImport } from './routes/api/public/booking-status.$id'
 
 const SpecialistsRoute = SpecialistsRouteImport.update({
   id: '/specialists',
@@ -23,6 +25,11 @@ const SpecialistsRoute = SpecialistsRouteImport.update({
 const ConfirmationRoute = ConfirmationRouteImport.update({
   id: '/confirmation',
   path: '/confirmation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CancelRoute = CancelRouteImport.update({
+  id: '/cancel',
+  path: '/cancel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -40,54 +47,79 @@ const BookSpecialistIdRoute = BookSpecialistIdRouteImport.update({
   path: '/book/$specialistId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicBookingStatusIdRoute =
+  ApiPublicBookingStatusIdRouteImport.update({
+    id: '/api/public/booking-status/$id',
+    path: '/api/public/booking-status/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/cancel': typeof CancelRoute
   '/confirmation': typeof ConfirmationRoute
   '/specialists': typeof SpecialistsRoute
   '/book/$specialistId': typeof BookSpecialistIdRoute
+  '/api/public/booking-status/$id': typeof ApiPublicBookingStatusIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/cancel': typeof CancelRoute
   '/confirmation': typeof ConfirmationRoute
   '/specialists': typeof SpecialistsRoute
   '/book/$specialistId': typeof BookSpecialistIdRoute
+  '/api/public/booking-status/$id': typeof ApiPublicBookingStatusIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/cancel': typeof CancelRoute
   '/confirmation': typeof ConfirmationRoute
   '/specialists': typeof SpecialistsRoute
   '/book/$specialistId': typeof BookSpecialistIdRoute
+  '/api/public/booking-status/$id': typeof ApiPublicBookingStatusIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/admin'
+    | '/cancel'
     | '/confirmation'
     | '/specialists'
     | '/book/$specialistId'
+    | '/api/public/booking-status/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/confirmation' | '/specialists' | '/book/$specialistId'
+  to:
+    | '/'
+    | '/admin'
+    | '/cancel'
+    | '/confirmation'
+    | '/specialists'
+    | '/book/$specialistId'
+    | '/api/public/booking-status/$id'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/cancel'
     | '/confirmation'
     | '/specialists'
     | '/book/$specialistId'
+    | '/api/public/booking-status/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  CancelRoute: typeof CancelRoute
   ConfirmationRoute: typeof ConfirmationRoute
   SpecialistsRoute: typeof SpecialistsRoute
   BookSpecialistIdRoute: typeof BookSpecialistIdRoute
+  ApiPublicBookingStatusIdRoute: typeof ApiPublicBookingStatusIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -104,6 +136,13 @@ declare module '@tanstack/react-router' {
       path: '/confirmation'
       fullPath: '/confirmation'
       preLoaderRoute: typeof ConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cancel': {
+      id: '/cancel'
+      path: '/cancel'
+      fullPath: '/cancel'
+      preLoaderRoute: typeof CancelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -127,15 +166,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookSpecialistIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/booking-status/$id': {
+      id: '/api/public/booking-status/$id'
+      path: '/api/public/booking-status/$id'
+      fullPath: '/api/public/booking-status/$id'
+      preLoaderRoute: typeof ApiPublicBookingStatusIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  CancelRoute: CancelRoute,
   ConfirmationRoute: ConfirmationRoute,
   SpecialistsRoute: SpecialistsRoute,
   BookSpecialistIdRoute: BookSpecialistIdRoute,
+  ApiPublicBookingStatusIdRoute: ApiPublicBookingStatusIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
