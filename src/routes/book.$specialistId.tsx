@@ -119,21 +119,28 @@ function BookPage() {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("bookings").insert({
-      specialist_id: specialistId,
-      service_id: serviceId,
-      booking_date: toDateKey(date),
-      booking_time: time,
-      ...parsed.data,
-      status: "confirmed",
-    });
+    const { data: inserted, error } = await supabase
+      .from("bookings")
+      .insert({
+        specialist_id: specialistId,
+        service_id: serviceId,
+        booking_date: toDateKey(date),
+        booking_time: time,
+        ...parsed.data,
+        status: "confirmed",
+      })
+      .select("id,cancel_token")
+      .single();
     setSubmitting(false);
-    if (error) {
-      toast.error(error.code === "23505" ? "Този час вече е зает. Моля, изберете друг." : "Възникна грешка. Опитайте отново.");
+    if (error || !inserted) {
+      toast.error(error?.code === "23505" ? "Този час вече е зает. Моля, изберете друг." : "Възникна грешка. Опитайте отново.");
       return;
     }
+    const cancelUrl = `${window.location.origin}/cancel?token=${inserted.cancel_token}`;
     sendBookingWebhooks({
       data: {
+        booking_id: inserted.id,
+        cancel_url: cancelUrl,
         client_name: parsed.data.client_name,
         client_email: parsed.data.client_email,
         client_phone: parsed.data.client_phone,

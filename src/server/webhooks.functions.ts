@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 const payloadSchema = z.object({
+  booking_id: z.string().uuid(),
+  cancel_url: z.string().url(),
   client_name: z.string(),
   client_email: z.string(),
   client_phone: z.string(),
@@ -18,12 +20,14 @@ export const sendBookingWebhooks = createServerFn({ method: "POST" })
       (u): u is string => !!u,
     );
 
+    const payload = { event: "booking.created" as const, ...data };
+
     const results = await Promise.allSettled(
       urls.map((url) =>
         fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify(payload),
         }),
       ),
     );
