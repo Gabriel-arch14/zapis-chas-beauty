@@ -260,7 +260,7 @@ function Index() {
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-5 gap-10 lg:gap-16 items-center max-w-6xl mx-auto">
             <div className="lg:col-span-2 order-2 lg:order-1">
-              <img src={gallery3} alt="Атмосфера в студиото" className="w-full h-80 lg:h-[420px] object-cover border border-border" />
+              <img src={gallery3} alt="Атмосфера в студиото" loading="lazy" decoding="async" className="w-full h-80 lg:h-[420px] object-cover border border-border" />
             </div>
             <div className="lg:col-span-3 order-1 lg:order-2">
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">За студиото</p>
