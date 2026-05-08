@@ -160,12 +160,12 @@ function Index() {
             <div className="relative hidden lg:block">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-4 mt-10">
-                  <img src={gallery1} alt="Nail art" className="w-full h-56 object-cover border border-border" />
-                  <img src={gallery3} alt="Френски маникюр" className="w-full h-72 object-cover border border-border" />
+                  <img src={gallery1} alt="Nail art" loading="eager" fetchPriority="high" decoding="async" className="w-full h-56 object-cover border border-border" />
+                  <img src={gallery3} alt="Френски маникюр" loading="eager" fetchPriority="high" decoding="async" className="w-full h-72 object-cover border border-border" />
                 </div>
                 <div className="space-y-4">
-                  <img src={gallery2} alt="Маникюр" className="w-full h-72 object-cover border border-border" />
-                  <img src={gallery1} alt="Маникюр детайл" className="w-full h-56 object-cover border border-border" />
+                  <img src={gallery2} alt="Маникюр" loading="eager" fetchPriority="high" decoding="async" className="w-full h-72 object-cover border border-border" />
+                  <img src={gallery1} alt="Маникюр детайл" loading="lazy" decoding="async" className="w-full h-56 object-cover border border-border" />
                 </div>
               </div>
               <div className="absolute -bottom-4 -left-4 bg-card border border-border px-5 py-3 text-xs uppercase tracking-[0.15em] text-foreground">
