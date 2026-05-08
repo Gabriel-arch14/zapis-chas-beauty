@@ -160,12 +160,12 @@ function Index() {
             <div className="relative hidden lg:block">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-4 mt-10">
-                  <img src={gallery1} alt="Nail art" className="w-full h-56 object-cover border border-border" />
-                  <img src={gallery3} alt="Френски маникюр" className="w-full h-72 object-cover border border-border" />
+                  <img src={gallery1} alt="Nail art" loading="eager" fetchPriority="high" decoding="async" className="w-full h-56 object-cover border border-border" />
+                  <img src={gallery3} alt="Френски маникюр" loading="eager" fetchPriority="high" decoding="async" className="w-full h-72 object-cover border border-border" />
                 </div>
                 <div className="space-y-4">
-                  <img src={gallery2} alt="Маникюр" className="w-full h-72 object-cover border border-border" />
-                  <img src={gallery1} alt="Маникюр детайл" className="w-full h-56 object-cover border border-border" />
+                  <img src={gallery2} alt="Маникюр" loading="eager" fetchPriority="high" decoding="async" className="w-full h-72 object-cover border border-border" />
+                  <img src={gallery1} alt="Маникюр детайл" loading="lazy" decoding="async" className="w-full h-56 object-cover border border-border" />
                 </div>
               </div>
               <div className="absolute -bottom-4 -left-4 bg-card border border-border px-5 py-3 text-xs uppercase tracking-[0.15em] text-foreground">
@@ -175,7 +175,7 @@ function Index() {
 
             {/* Mobile single image */}
             <div className="lg:hidden">
-              <img src={gallery2} alt="Маникюр в Ruseva Nails Studio" className="w-full h-72 object-cover border border-border" />
+              <img src={gallery2} alt="Маникюр в Ruseva Nails Studio" loading="eager" fetchPriority="high" decoding="async" className="w-full h-72 object-cover border border-border" />
             </div>
           </div>
         </div>
@@ -260,7 +260,7 @@ function Index() {
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-5 gap-10 lg:gap-16 items-center max-w-6xl mx-auto">
             <div className="lg:col-span-2 order-2 lg:order-1">
-              <img src={gallery3} alt="Атмосфера в студиото" className="w-full h-80 lg:h-[420px] object-cover border border-border" />
+              <img src={gallery3} alt="Атмосфера в студиото" loading="lazy" decoding="async" className="w-full h-80 lg:h-[420px] object-cover border border-border" />
             </div>
             <div className="lg:col-span-3 order-1 lg:order-2">
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">За студиото</p>
