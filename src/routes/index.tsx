@@ -33,8 +33,8 @@ const GALLERY_IMAGES = [
 ];
 
 const ADDRESS = 'ул. "Христо Смирненски" 17, Габрово';
-const MAP_SRC = "https://www.google.com/maps?q=42.8712,25.3187&z=17&output=embed";
-const MAPS_LINK = "https://maps.google.com/?q=ул.Христо+Смирненски+17,Габрово";
+const MAP_SRC = "https://www.google.com/maps?q=ул.+Христо+Смирненски+17,+Габрово+5302&z=18&output=embed";
+const MAPS_LINK = "https://www.google.com/maps/search/?api=1&query=%D1%83%D0%BB.+%D0%A5%D1%80%D0%B8%D1%81%D1%82%D0%BE+%D0%A1%D0%BC%D0%B8%D1%80%D0%BD%D0%B5%D0%BD%D1%81%D0%BA%D0%B8+17%2C+%D0%93%D0%B0%D0%B1%D1%80%D0%BE%D0%B2%D0%BE+5302";
 const FB_LINK = "https://www.facebook.com/profile.php?id=100082830309797";
 
 const SERVICES = [
