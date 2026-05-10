@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      available_slots: {
+        Row: {
+          calendar_event_id: string | null
+          created_at: string | null
+          id: string
+          is_available: boolean | null
+          slot_date: string
+          slot_time: string
+          specialist_id: number | null
+        }
+        Insert: {
+          calendar_event_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_available?: boolean | null
+          slot_date: string
+          slot_time: string
+          specialist_id?: number | null
+        }
+        Update: {
+          calendar_event_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_available?: boolean | null
+          slot_date?: string
+          slot_time?: string
+          specialist_id?: number | null
+        }
+        Relationships: []
+      }
       blocked_slots: {
         Row: {
           blocked_date: string
