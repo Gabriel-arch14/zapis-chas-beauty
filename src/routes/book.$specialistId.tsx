@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { generateTimeSlots, formatBGN, toDateKey, normalizeTime, formatDateBG } from "@/lib/booking";
+import { formatBGN, toDateKey, normalizeTime, formatDateBG } from "@/lib/booking";
 import { Check, Clock, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
