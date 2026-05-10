@@ -267,28 +267,34 @@ function BookPage() {
             <div>
               <h2 className="font-display text-2xl text-mauve mb-1">Изберете час</h2>
               <p className="text-sm text-muted-foreground mb-4">{formatDateBG(date)}</p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {allSlots.map((slot) => {
-                  const taken = bookedTimes.has(slot) || blockedTimes.has(slot);
-                  return (
+              {loadingSlots && (
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <Skeleton key={i} className="h-10 rounded-lg" />
+                  ))}
+                </div>
+              )}
+              {!loadingSlots && availableTimes && availableTimes.length > 0 && (
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {availableTimes.map((slot) => (
                     <button
                       key={slot}
-                      disabled={taken}
                       onClick={() => setTime(slot)}
                       className={cn(
                         "rounded-lg border-2 py-2.5 text-sm font-medium transition-smooth",
-                        taken && "opacity-40 cursor-not-allowed line-through bg-muted border-border",
-                        !taken && time === slot && "border-primary bg-primary text-primary-foreground shadow-soft",
-                        !taken && time !== slot && "border-border bg-white hover:border-primary/60 text-mauve"
+                        time === slot && "border-primary bg-primary text-primary-foreground shadow-soft",
+                        time !== slot && "border-border bg-white hover:border-primary/60 text-mauve"
                       )}
                     >
                       {slot}
                     </button>
-                  );
-                })}
-              </div>
-              {allSlots.every((s) => bookedTimes.has(s) || blockedTimes.has(s)) && (
-                <p className="text-center text-muted-foreground mt-4">Няма свободни часове за тази дата.</p>
+                  ))}
+                </div>
+              )}
+              {!loadingSlots && availableTimes && availableTimes.length === 0 && (
+                <p className="text-center text-muted-foreground mt-4">
+                  Няма свободни часове за тази дата.<br />Моля изберете друга дата.
+                </p>
               )}
             </div>
           )}
