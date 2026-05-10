@@ -55,8 +55,8 @@ function BookPage() {
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string | null>(null);
-  const [bookedTimes, setBookedTimes] = useState<Set<string>>(new Set());
-  const [blockedTimes, setBlockedTimes] = useState<Set<string>>(new Set());
+  const [availableTimes, setAvailableTimes] = useState<string[] | null>(null);
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set());
   const [client, setClient] = useState({ client_name: "", client_email: "", client_phone: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -83,28 +83,29 @@ function BookPage() {
       .eq("specialist_id", specialistId)
       .is("blocked_time", null)
       .then(({ data }) => {
-        setBlockedDates(new Set((data ?? []).map((r: any) => r.blocked_date)));
+        setBlockedDates(new Set((data ?? []).map((r: { blocked_date: string }) => r.blocked_date)));
       });
   }, [specialistId]);
 
-  // Load booked + blocked times for selected date
+  // Load available slots for the selected date from available_slots table
   useEffect(() => {
     if (!date) return;
     const key = toDateKey(date);
-    Promise.all([
-      supabase.from("bookings").select("booking_time,status").eq("specialist_id", specialistId).eq("booking_date", key).neq("status", "cancelled"),
-      supabase.from("blocked_slots").select("blocked_time").eq("specialist_id", specialistId).eq("blocked_date", key).not("blocked_time", "is", null),
-    ]).then(([b, bl]) => {
-      setBookedTimes(new Set((b.data ?? []).map((r: any) => normalizeTime(r.booking_time))));
-      setBlockedTimes(new Set((bl.data ?? []).map((r: any) => normalizeTime(r.blocked_time))));
-    });
-  }, [date, specialistId]);
-
-  const allSlots = useMemo(() => {
-    if (!specialist) return [];
-    const wh = specialist.working_hours ?? { start: "09:00", end: "18:00" };
-    return generateTimeSlots(wh.start, wh.end, 30);
-  }, [specialist]);
+    setLoadingSlots(true);
+    setAvailableTimes(null);
+    supabase
+      .from("available_slots")
+      .select("slot_time")
+      .eq("slot_date", key)
+      .eq("is_available", true)
+      .order("slot_time")
+      .then(({ data }) => {
+        const times = (data ?? []).map((r: { slot_time: string }) => normalizeTime(r.slot_time));
+        // dedupe
+        setAvailableTimes(Array.from(new Set(times)));
+        setLoadingSlots(false);
+      });
+  }, [date]);
 
   const selectedService = services.find((s) => s.id === serviceId);
 
