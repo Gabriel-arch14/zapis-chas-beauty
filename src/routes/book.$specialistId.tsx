@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { generateTimeSlots, formatBGN, toDateKey, normalizeTime, formatDateBG } from "@/lib/booking";
+import { formatBGN, toDateKey, normalizeTime, formatDateBG } from "@/lib/booking";
 import { Check, Clock, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -55,8 +55,8 @@ function BookPage() {
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string | null>(null);
-  const [bookedTimes, setBookedTimes] = useState<Set<string>>(new Set());
-  const [blockedTimes, setBlockedTimes] = useState<Set<string>>(new Set());
+  const [availableTimes, setAvailableTimes] = useState<string[] | null>(null);
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set());
   const [client, setClient] = useState({ client_name: "", client_email: "", client_phone: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -83,28 +83,29 @@ function BookPage() {
       .eq("specialist_id", specialistId)
       .is("blocked_time", null)
       .then(({ data }) => {
-        setBlockedDates(new Set((data ?? []).map((r: any) => r.blocked_date)));
+        setBlockedDates(new Set((data ?? []).map((r: { blocked_date: string }) => r.blocked_date)));
       });
   }, [specialistId]);
 
-  // Load booked + blocked times for selected date
+  // Load available slots for the selected date from available_slots table
   useEffect(() => {
     if (!date) return;
     const key = toDateKey(date);
-    Promise.all([
-      supabase.from("bookings").select("booking_time,status").eq("specialist_id", specialistId).eq("booking_date", key).neq("status", "cancelled"),
-      supabase.from("blocked_slots").select("blocked_time").eq("specialist_id", specialistId).eq("blocked_date", key).not("blocked_time", "is", null),
-    ]).then(([b, bl]) => {
-      setBookedTimes(new Set((b.data ?? []).map((r: any) => normalizeTime(r.booking_time))));
-      setBlockedTimes(new Set((bl.data ?? []).map((r: any) => normalizeTime(r.blocked_time))));
-    });
-  }, [date, specialistId]);
-
-  const allSlots = useMemo(() => {
-    if (!specialist) return [];
-    const wh = specialist.working_hours ?? { start: "09:00", end: "18:00" };
-    return generateTimeSlots(wh.start, wh.end, 30);
-  }, [specialist]);
+    setLoadingSlots(true);
+    setAvailableTimes(null);
+    supabase
+      .from("available_slots")
+      .select("slot_time")
+      .eq("slot_date", key)
+      .eq("is_available", true)
+      .order("slot_time")
+      .then(({ data }) => {
+        const times = (data ?? []).map((r: { slot_time: string }) => normalizeTime(r.slot_time));
+        // dedupe
+        setAvailableTimes(Array.from(new Set(times)));
+        setLoadingSlots(false);
+      });
+  }, [date]);
 
   const selectedService = services.find((s) => s.id === serviceId);
 
@@ -136,6 +137,12 @@ function BookPage() {
       toast.error(error?.code === "23505" ? "Този час вече е зает. Моля, изберете друг." : "Възникна грешка. Опитайте отново.");
       return;
     }
+    // Mark the slot as no longer available
+    await supabase
+      .from("available_slots")
+      .update({ is_available: false })
+      .eq("slot_date", toDateKey(date))
+      .eq("slot_time", time);
     const cancelUrl = `${window.location.origin}/cancel?token=${inserted.cancel_token}`;
     sendBookingWebhooks({
       data: {
@@ -266,28 +273,34 @@ function BookPage() {
             <div>
               <h2 className="font-display text-2xl text-mauve mb-1">Изберете час</h2>
               <p className="text-sm text-muted-foreground mb-4">{formatDateBG(date)}</p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {allSlots.map((slot) => {
-                  const taken = bookedTimes.has(slot) || blockedTimes.has(slot);
-                  return (
+              {loadingSlots && (
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <Skeleton key={i} className="h-10 rounded-lg" />
+                  ))}
+                </div>
+              )}
+              {!loadingSlots && availableTimes && availableTimes.length > 0 && (
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {availableTimes.map((slot) => (
                     <button
                       key={slot}
-                      disabled={taken}
                       onClick={() => setTime(slot)}
                       className={cn(
                         "rounded-lg border-2 py-2.5 text-sm font-medium transition-smooth",
-                        taken && "opacity-40 cursor-not-allowed line-through bg-muted border-border",
-                        !taken && time === slot && "border-primary bg-primary text-primary-foreground shadow-soft",
-                        !taken && time !== slot && "border-border bg-white hover:border-primary/60 text-mauve"
+                        time === slot && "border-primary bg-primary text-primary-foreground shadow-soft",
+                        time !== slot && "border-border bg-white hover:border-primary/60 text-mauve"
                       )}
                     >
                       {slot}
                     </button>
-                  );
-                })}
-              </div>
-              {allSlots.every((s) => bookedTimes.has(s) || blockedTimes.has(s)) && (
-                <p className="text-center text-muted-foreground mt-4">Няма свободни часове за тази дата.</p>
+                  ))}
+                </div>
+              )}
+              {!loadingSlots && availableTimes && availableTimes.length === 0 && (
+                <p className="text-center text-muted-foreground mt-4">
+                  Няма свободни часове за тази дата.<br />Моля изберете друга дата.
+                </p>
               )}
             </div>
           )}
