@@ -127,10 +127,10 @@ function Index() {
                 Премиум маникюр, педикюр и nail art с внимание към всеки детайл. Запишете час онлайн — бързо, лесно и удобно.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-3">
-                <Button asChild size="lg" className="h-14 sm:h-12 text-base sm:text-sm px-8 sm:px-7 rounded-none w-full sm:w-auto bg-foreground text-background hover:bg-foreground/85">
+                <Button asChild size="lg" className="h-14 text-base px-8 rounded-none w-full sm:w-auto bg-foreground text-background hover:bg-foreground/85">
                   <Link to="/specialists">
                     Запиши час сега
-                    <ArrowRight className="ml-2 h-5 w-5 sm:h-4 sm:w-4" />
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
                 <Button
@@ -441,10 +441,10 @@ function Index() {
           </h2>
           <p className="mt-4 text-background/70">Запишете час онлайн бързо и лесно.</p>
           <div className="mt-8">
-            <Button asChild size="lg" className="rounded-none h-14 sm:h-12 text-base sm:text-sm px-8 bg-background text-foreground hover:bg-background/90">
+            <Button asChild size="lg" className="rounded-none h-14 text-base px-8 bg-background text-foreground hover:bg-background/90">
               <Link to="/specialists">
                 Запиши час сега
-                <ArrowRight className="ml-2 h-5 w-5 sm:h-4 sm:w-4" />
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
