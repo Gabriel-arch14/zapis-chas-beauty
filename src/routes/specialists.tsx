@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarPlus } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/specialists")({
   head: () => ({
@@ -48,43 +49,51 @@ function SpecialistsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {list === null
             ? Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-96 rounded-2xl" />)
-            : list.map((s) => (
-                <article
-                  key={s.id}
-                  className="group rounded-2xl overflow-hidden bg-card shadow-card border border-border/50 transition-smooth hover:-translate-y-1 hover:shadow-glow flex flex-col"
-                >
-                  <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
-                    {s.photo_url ? (
-                      <img
-                        src={s.photo_url}
-                        alt={s.name}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-smooth group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-secondary flex items-center justify-center p-6 text-center">
-                        <span className="font-display text-2xl sm:text-3xl font-semibold text-foreground leading-tight">
-                          Ruseva Nails Studio
+            : list.map((s) => {
+                const isRuseva = /русева|ruseva/i.test(s.name);
+                const imgSrc = isRuseva ? logo : s.photo_url;
+                return (
+                  <Link
+                    key={s.id}
+                    to="/book/$specialistId"
+                    params={{ specialistId: s.id }}
+                    className="group rounded-2xl overflow-hidden bg-card shadow-card border border-border/50 transition-smooth hover:-translate-y-1 hover:shadow-glow flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-mauve"
+                  >
+                    <article className="flex flex-col flex-1">
+                      <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
+                        {imgSrc ? (
+                          <img
+                            src={imgSrc}
+                            alt={s.name}
+                            loading="lazy"
+                            className={`h-full w-full transition-smooth group-hover:scale-105 ${isRuseva ? "object-contain p-6 bg-card" : "object-cover"}`}
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-secondary flex items-center justify-center p-6 text-center">
+                            <span className="font-display text-2xl sm:text-3xl font-semibold text-foreground leading-tight">
+                              Ruseva Nails Studio
+                            </span>
+                          </div>
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
+                        <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 text-xs font-medium text-mauve shadow-soft">
+                          {s.specialty}
                         </span>
                       </div>
-                    )}
-                    <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
-                    <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 text-xs font-medium text-mauve shadow-soft">
-                      {s.specialty}
-                    </span>
-                  </div>
-                  <div className="p-6 flex flex-col flex-1">
-                    <h2 className="text-xl font-display font-semibold text-mauve">{s.name}</h2>
-                    {s.bio && <p className="mt-2 text-sm text-muted-foreground line-clamp-3 flex-1">{s.bio}</p>}
-                    <Button asChild className="mt-5 w-full rounded-none transition-smooth">
-                      <Link to="/book/$specialistId" params={{ specialistId: s.id }}>
-                        <CalendarPlus className="mr-2 h-4 w-4" />
-                        Запази Час
-                      </Link>
-                    </Button>
-                  </div>
-                </article>
-              ))}
+                      <div className="p-6 flex flex-col flex-1">
+                        <h2 className="text-xl font-display font-semibold text-mauve">{s.name}</h2>
+                        {s.bio && <p className="mt-2 text-sm text-muted-foreground line-clamp-3 flex-1">{s.bio}</p>}
+                        <Button asChild className="mt-5 w-full rounded-none transition-smooth pointer-events-none">
+                          <span>
+                            <CalendarPlus className="mr-2 h-4 w-4" />
+                            Запази Час
+                          </span>
+                        </Button>
+                      </div>
+                    </article>
+                  </Link>
+                );
+              })}
         </div>
 
         {list?.length === 0 && (
