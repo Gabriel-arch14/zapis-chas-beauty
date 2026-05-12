@@ -29,8 +29,8 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/85 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-3">
         <Link to="/" className="flex items-center gap-2.5 group min-w-0" onClick={() => setOpen(false)}>
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-border bg-card">
-            <Sparkles className="h-4 w-4 text-gold" strokeWidth={1.5} />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden border border-border bg-card">
+            <img src={logo} alt="Ruseva Nails Studio лого" className="h-full w-full object-cover" />
           </span>
           <span className="font-display text-base sm:text-lg font-semibold text-foreground truncate tracking-tight">
             Ruseva Nails Studio
