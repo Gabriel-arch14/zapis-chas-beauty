@@ -214,13 +214,8 @@ function Index() {
               ))}
             </div>
           </div>
-
-          <div className="text-center mt-12">
-            <Button asChild size="lg" className="rounded-none h-12 px-8 bg-foreground text-background hover:bg-foreground/85">
-              <Link to="/specialists">Към галерията</Link>
-            </Button>
-          </div>
         </div>
+
       </section>
 
       {/* Services */}
