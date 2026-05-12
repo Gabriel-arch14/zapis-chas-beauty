@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { Sparkles, Phone, MapPin, Facebook } from "lucide-react";
 
 const MAPS_LINK = "https://maps.google.com/?q=ул.Христо+Смирненски+17,Габрово";
@@ -41,11 +40,8 @@ export function SiteFooter() {
             </a>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border pt-5 text-xs text-muted-foreground">
+        <div className="border-t border-border pt-5 text-xs text-muted-foreground text-center">
           <p>© {new Date().getFullYear()} Ruseva Nails Studio. Всички права запазени.</p>
-          <Link to="/admin" className="hover:text-foreground transition-smooth">
-            Админ вход
-          </Link>
         </div>
       </div>
     </footer>
