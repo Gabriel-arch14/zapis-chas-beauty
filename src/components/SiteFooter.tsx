@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { Sparkles, Phone, MapPin, Facebook } from "lucide-react";
 
 const MAPS_LINK = "https://maps.google.com/?q=ул.Христо+Смирненски+17,Габрово";
