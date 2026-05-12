@@ -179,6 +179,13 @@ function Index() {
             </div>
           </div>
         </div>
+        <Link
+          to="/admin"
+          aria-label="Админ вход"
+          className="absolute bottom-2 right-2 text-[10px] text-muted-foreground/40 hover:text-muted-foreground transition-smooth"
+        >
+          ·
+        </Link>
       </section>
 
       {/* Gallery */}
