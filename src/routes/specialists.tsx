@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarPlus } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/specialists")({
   head: () => ({
