@@ -441,10 +441,10 @@ function Index() {
           </h2>
           <p className="mt-4 text-background/70">Запишете час онлайн бързо и лесно.</p>
           <div className="mt-8">
-            <Button asChild size="lg" className="rounded-none h-14 sm:h-12 text-base sm:text-sm px-8 bg-background text-foreground hover:bg-background/90">
+            <Button asChild size="lg" className="rounded-none h-14 text-base px-8 bg-background text-foreground hover:bg-background/90">
               <Link to="/specialists">
                 Запиши час сега
-                <ArrowRight className="ml-2 h-5 w-5 sm:h-4 sm:w-4" />
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
