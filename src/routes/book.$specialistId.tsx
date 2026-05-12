@@ -335,7 +335,17 @@ function BookPage() {
 
         {/* Nav buttons */}
         <div className="flex justify-between mt-6">
-          <Button variant="outline" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1} className="rounded-full">
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (step === 1) {
+                navigate({ to: "/specialists" });
+              } else {
+                setStep((s) => Math.max(1, s - 1));
+              }
+            }}
+            className="rounded-full"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" /> Назад
           </Button>
           {step < 4 ? (
