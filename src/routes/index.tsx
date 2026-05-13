@@ -143,15 +143,15 @@ function Index() {
                 </Button>
               </div>
               {/* Trust badges */}
-              <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-gold" /> Лесно онлайн записване
+              <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border bg-card text-xs text-foreground">
+                  <Star className="h-3.5 w-3.5 text-gold fill-gold" /> 5.0 оценка от клиенти
                 </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-gold" /> Професионална грижа
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border bg-card text-xs text-foreground">
+                  <MapPin className="h-3.5 w-3.5 text-gold" /> Габрово
                 </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-gold" /> Габрово
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border bg-card text-xs text-foreground">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-gold" /> Онлайн записване под 1 минута
                 </span>
               </div>
             </div>
