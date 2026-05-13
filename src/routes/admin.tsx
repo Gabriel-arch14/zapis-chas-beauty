@@ -180,8 +180,44 @@ function CalendarTab() {
     return rows.filter((r) => r.booking_date === key);
   }, [selected, rows]);
 
+  const monthView = selected ?? new Date();
+  const monthStats = useMemo(() => {
+    if (!rows) return { total: 0, confirmed: 0, completed: 0, cancelled: 0, byDay: [] as { date: string; count: number }[] };
+    const y = monthView.getFullYear();
+    const m = monthView.getMonth();
+    const inMonth = rows.filter((r) => {
+      const [ry, rm] = r.booking_date.split("-").map(Number);
+      return ry === y && rm - 1 === m;
+    });
+    const counts: Record<string, number> = {};
+    inMonth.forEach((r) => {
+      if (r.status === "cancelled") return;
+      counts[r.booking_date] = (counts[r.booking_date] ?? 0) + 1;
+    });
+    const byDay = Object.entries(counts)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, count]) => ({ date, count }));
+    return {
+      total: inMonth.filter((r) => r.status !== "cancelled").length,
+      confirmed: inMonth.filter((r) => r.status === "confirmed").length,
+      completed: inMonth.filter((r) => r.status === "completed").length,
+      cancelled: inMonth.filter((r) => r.status === "cancelled").length,
+      byDay,
+    };
+  }, [rows, monthView]);
+
+  const monthLabel = monthView.toLocaleDateString("bg-BG", { month: "long", year: "numeric" });
+
   return (
-    <div className="mt-6 grid lg:grid-cols-2 gap-6">
+    <div className="mt-6 space-y-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatCard label={`Общо за ${monthLabel}`} value={monthStats.total} accent="primary" />
+        <StatCard label="Потвърдени" value={monthStats.confirmed} />
+        <StatCard label="Завършени" value={monthStats.completed} />
+        <StatCard label="Отказани" value={monthStats.cancelled} />
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6">
       <div className="rounded-xl border bg-card p-5 flex justify-center">
         <Calendar
           mode="single"
