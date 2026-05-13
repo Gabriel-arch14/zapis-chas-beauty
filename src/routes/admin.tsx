@@ -760,12 +760,12 @@ function BlockedTab() {
       blocked_date: toDateKey(date),
       blocked_time: time === "all" ? null : time,
     });
-    if (error) toast.error(error.message); else { toast.success("Блокирано"); load(); }
+    if (error) toast.error(getAdminErrorMessage(error)); else { toast.success("Блокирано"); load(); }
   };
 
   const remove = async (id: string) => {
     const { error } = await supabase.from("blocked_slots").delete().eq("id", id);
-    if (error) toast.error(error.message); else load();
+    if (error) toast.error(getAdminErrorMessage(error)); else load();
   };
 
   const slots = generateTimeSlots("09:00", "19:00", 30);
