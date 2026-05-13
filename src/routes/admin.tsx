@@ -124,19 +124,27 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   return (
     <div className="min-h-screen flex flex-col">
       <SiteHeader />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <h1 className="font-display text-2xl sm:text-3xl text-mauve">Админ панел</h1>
-          <Button variant="outline" onClick={onLogout} className="rounded-full"><LogOut className="mr-2 h-4 w-4" /> Изход</Button>
+      <main className="flex-1 container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <div className="flex items-center justify-between gap-3 mb-5 sm:mb-6">
+          <h1 className="font-display text-xl sm:text-3xl text-mauve">Админ панел</h1>
+          <Button variant="outline" onClick={onLogout} size="sm" className="rounded-full sm:size-default">
+            <LogOut className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Изход</span>
+          </Button>
         </div>
 
         <Tabs defaultValue="calendar">
-          <TabsList className="bg-secondary flex w-full overflow-x-auto h-auto flex-wrap sm:flex-nowrap">
-            <TabsTrigger value="calendar" className="flex-1 min-w-fit text-xs sm:text-sm">Календар</TabsTrigger>
-            <TabsTrigger value="bookings" className="flex-1 min-w-fit text-xs sm:text-sm">Резервации</TabsTrigger>
-            <TabsTrigger value="specialists" className="flex-1 min-w-fit text-xs sm:text-sm">Специалисти</TabsTrigger>
-            <TabsTrigger value="services" className="flex-1 min-w-fit text-xs sm:text-sm">Услуги</TabsTrigger>
-            <TabsTrigger value="blocked" className="flex-1 min-w-fit text-xs sm:text-sm">Блокирани</TabsTrigger>
+          {/* Mobile: dropdown selector */}
+          <div className="sm:hidden mb-4">
+            <MobileTabSelect />
+          </div>
+          {/* Desktop/tablet: horizontal tabs */}
+          <TabsList className="hidden sm:flex bg-secondary w-full overflow-x-auto h-auto">
+            <TabsTrigger value="calendar" className="flex-1 min-w-fit text-sm">Календар</TabsTrigger>
+            <TabsTrigger value="bookings" className="flex-1 min-w-fit text-sm">Резервации</TabsTrigger>
+            <TabsTrigger value="specialists" className="flex-1 min-w-fit text-sm">Специалисти</TabsTrigger>
+            <TabsTrigger value="services" className="flex-1 min-w-fit text-sm">Услуги</TabsTrigger>
+            <TabsTrigger value="blocked" className="flex-1 min-w-fit text-sm">Блокирани</TabsTrigger>
           </TabsList>
           <TabsContent value="calendar"><CalendarTab /></TabsContent>
           <TabsContent value="bookings"><BookingsTab /></TabsContent>
