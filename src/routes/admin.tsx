@@ -667,7 +667,7 @@ function SpecialistsTab() {
 function ServicesTab() {
   const [specialists, setSpecialists] = useState<SpecialistRow[]>([]);
   const [services, setServices] = useState<ServiceRow[] | null>(null);
-  const [form, setForm] = useState<{ specialist_id: string; name: string; duration_minutes: string; price: string }>({ specialist_id: "", name: "", duration_minutes: "30", price: "0" });
+  const [form, setForm] = useState<{ specialist_id: string; name: string; duration_minutes: string; price: string }>({ specialist_id: "", name: "", duration_minutes: "", price: "" });
 
   const load = async () => {
     const [{ data: sp }, { data: svc }] = await Promise.all([
@@ -680,18 +680,21 @@ function ServicesTab() {
   useEffect(() => { load(); }, []);
 
   const add = async () => {
-    if (!form.specialist_id || !form.name) { toast.error("Изберете специалист и въведете име"); return; }
-    const duration_minutes = parseInt(form.duration_minutes) || 30;
-    const price = parseFloat(form.price) || 0;
+    if (!form.specialist_id || !form.name.trim()) { toast.error("Изберете специалист и въведете име"); return; }
+    if (form.duration_minutes.trim() === "" || form.price.trim() === "") { toast.error("Попълнете времетраене и цена"); return; }
+    const duration_minutes = Number(form.duration_minutes);
+    const price = Number(form.price);
+    if (!Number.isFinite(duration_minutes) || duration_minutes <= 0) { toast.error("Въведете валидно времетраене"); return; }
+    if (!Number.isFinite(price) || price < 0) { toast.error("Въведете валидна цена"); return; }
     const { error } = await supabase.from("services").insert({ specialist_id: form.specialist_id, name: form.name, duration_minutes, price });
-    if (error) toast.error(error.message);
-    else { toast.success("Добавена"); setForm({ specialist_id: "", name: "", duration_minutes: "30", price: "0" }); load(); }
+    if (error) toast.error(getAdminErrorMessage(error));
+    else { toast.success("Добавена"); setForm({ specialist_id: "", name: "", duration_minutes: "", price: "" }); load(); }
   };
 
   const remove = async (id: string) => {
     if (!confirm("Изтриване на услугата?")) return;
     const { error } = await supabase.from("services").delete().eq("id", id);
-    if (error) toast.error(error.message); else { toast.success("Изтрита"); load(); }
+    if (error) toast.error(getAdminErrorMessage(error)); else { toast.success("Изтрита"); load(); }
   };
 
   return (
