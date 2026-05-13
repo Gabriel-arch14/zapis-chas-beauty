@@ -121,6 +121,14 @@ interface SpecialistRow { id: string; name: string; specialty: string; photo_url
 interface ServiceRow { id: string; specialist_id: string; name: string; duration_minutes: number; price: number; }
 
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
+  const [tab, setTab] = useState("calendar");
+  const tabs = [
+    { value: "calendar", label: "Календар" },
+    { value: "bookings", label: "Резервации" },
+    { value: "specialists", label: "Специалисти" },
+    { value: "services", label: "Услуги" },
+    { value: "blocked", label: "Блокирани" },
+  ];
   return (
     <div className="min-h-screen flex flex-col">
       <SiteHeader />
@@ -133,18 +141,20 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           </Button>
         </div>
 
-        <Tabs defaultValue="calendar">
-          {/* Mobile: dropdown selector */}
+        <Tabs value={tab} onValueChange={setTab}>
+          {/* Mobile: dropdown selector — easier than tiny tabs */}
           <div className="sm:hidden mb-4">
-            <MobileTabSelect />
+            <Select value={tab} onValueChange={setTab}>
+              <SelectTrigger className="w-full h-12 text-base"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {tabs.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
-          {/* Desktop/tablet: horizontal tabs */}
           <TabsList className="hidden sm:flex bg-secondary w-full overflow-x-auto h-auto">
-            <TabsTrigger value="calendar" className="flex-1 min-w-fit text-sm">Календар</TabsTrigger>
-            <TabsTrigger value="bookings" className="flex-1 min-w-fit text-sm">Резервации</TabsTrigger>
-            <TabsTrigger value="specialists" className="flex-1 min-w-fit text-sm">Специалисти</TabsTrigger>
-            <TabsTrigger value="services" className="flex-1 min-w-fit text-sm">Услуги</TabsTrigger>
-            <TabsTrigger value="blocked" className="flex-1 min-w-fit text-sm">Блокирани</TabsTrigger>
+            {tabs.map((t) => (
+              <TabsTrigger key={t.value} value={t.value} className="flex-1 min-w-fit text-sm">{t.label}</TabsTrigger>
+            ))}
           </TabsList>
           <TabsContent value="calendar"><CalendarTab /></TabsContent>
           <TabsContent value="bookings"><BookingsTab /></TabsContent>
