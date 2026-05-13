@@ -130,7 +130,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     { value: "blocked", label: "Блокирани" },
   ];
   return (
-    <div className="min-h-screen flex flex-col bg-[#0f1115] text-slate-100">
+    <div className="dark min-h-screen flex flex-col bg-[#0f1115] text-slate-100">
       {/* Admin top bar */}
       <header className="sticky top-0 z-30 border-b border-slate-800 bg-[#0b0d11]/95 backdrop-blur">
         <div className="container mx-auto px-3 sm:px-4 h-12 flex items-center justify-between gap-3">
