@@ -146,6 +146,86 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   );
 }
 
+function CalendarTab() {
+  const [selected, setSelected] = useState<Date | undefined>(new Date());
+  const [rows, setRows] = useState<BookingRow[] | null>(null);
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("bookings")
+      .select("id,client_name,client_email,client_phone,booking_date,booking_time,status,specialists(name),services(name,price)")
+      .order("booking_date")
+      .order("booking_time");
+    setRows((data ?? []) as any);
+  };
+  useEffect(() => { load(); }, []);
+
+  const bookedDays = useMemo(() => {
+    const set = new Set<string>();
+    rows?.forEach((r) => { if (r.status !== "cancelled") set.add(r.booking_date); });
+    return Array.from(set).map((d) => {
+      const [y, m, day] = d.split("-").map(Number);
+      return new Date(y, m - 1, day);
+    });
+  }, [rows]);
+
+  const dayBookings = useMemo(() => {
+    if (!selected || !rows) return [];
+    const key = toDateKey(selected);
+    return rows.filter((r) => r.booking_date === key);
+  }, [selected, rows]);
+
+  return (
+    <div className="mt-6 grid lg:grid-cols-2 gap-6">
+      <div className="rounded-xl border bg-card p-5 flex justify-center">
+        <Calendar
+          mode="single"
+          selected={selected}
+          onSelect={setSelected}
+          modifiers={{ booked: bookedDays }}
+          modifiersClassNames={{
+            booked: "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1.5 after:w-1.5 after:rounded-full after:bg-primary",
+          }}
+          className="p-3 pointer-events-auto"
+        />
+      </div>
+      <div className="rounded-xl border bg-card p-5">
+        <h3 className="font-display text-lg text-mauve mb-3">
+          {selected ? formatDateBG(selected) : "Изберете дата"}
+        </h3>
+        {rows === null && <Skeleton className="h-24 w-full" />}
+        {rows !== null && dayBookings.length === 0 && (
+          <p className="text-sm text-muted-foreground">Няма резервации за този ден.</p>
+        )}
+        <div className="space-y-2">
+          {dayBookings.map((b) => (
+            <div key={b.id} className="flex items-start justify-between gap-3 p-3 rounded-lg border bg-background">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-mauve">{normalizeTime(b.booking_time)}</span>
+                  <span className={cn(
+                    "text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full",
+                    b.status === "confirmed" && "bg-primary/10 text-primary",
+                    b.status === "completed" && "bg-emerald-500/10 text-emerald-600",
+                    b.status === "cancelled" && "bg-destructive/10 text-destructive line-through",
+                  )}>
+                    {b.status === "confirmed" ? "потвърдена" : b.status === "completed" ? "завършена" : "отказана"}
+                  </span>
+                </div>
+                <div className="text-sm">{b.client_name}</div>
+                <div className="text-xs text-muted-foreground truncate">
+                  {b.specialists?.name} • {b.services?.name}
+                </div>
+                <div className="text-xs text-muted-foreground truncate">{b.client_phone} • {b.client_email}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function BookingsTab() {
   const [rows, setRows] = useState<BookingRow[] | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
