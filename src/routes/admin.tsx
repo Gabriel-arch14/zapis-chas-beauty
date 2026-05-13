@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -97,6 +97,11 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
               Вход
             </Button>
           </form>
+          <div className="mt-6 flex justify-start">
+            <Link to="/" className="text-sm text-muted-foreground hover:text-mauve inline-flex items-center gap-1">
+              ← Назад към Начало
+            </Link>
+          </div>
         </div>
       </main>
       <SiteFooter />
@@ -175,8 +180,44 @@ function CalendarTab() {
     return rows.filter((r) => r.booking_date === key);
   }, [selected, rows]);
 
+  const monthView = selected ?? new Date();
+  const monthStats = useMemo(() => {
+    if (!rows) return { total: 0, confirmed: 0, completed: 0, cancelled: 0, byDay: [] as { date: string; count: number }[] };
+    const y = monthView.getFullYear();
+    const m = monthView.getMonth();
+    const inMonth = rows.filter((r) => {
+      const [ry, rm] = r.booking_date.split("-").map(Number);
+      return ry === y && rm - 1 === m;
+    });
+    const counts: Record<string, number> = {};
+    inMonth.forEach((r) => {
+      if (r.status === "cancelled") return;
+      counts[r.booking_date] = (counts[r.booking_date] ?? 0) + 1;
+    });
+    const byDay = Object.entries(counts)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, count]) => ({ date, count }));
+    return {
+      total: inMonth.filter((r) => r.status !== "cancelled").length,
+      confirmed: inMonth.filter((r) => r.status === "confirmed").length,
+      completed: inMonth.filter((r) => r.status === "completed").length,
+      cancelled: inMonth.filter((r) => r.status === "cancelled").length,
+      byDay,
+    };
+  }, [rows, monthView]);
+
+  const monthLabel = monthView.toLocaleDateString("bg-BG", { month: "long", year: "numeric" });
+
   return (
-    <div className="mt-6 grid lg:grid-cols-2 gap-6">
+    <div className="mt-6 space-y-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatCard label={`Общо за ${monthLabel}`} value={monthStats.total} accent="primary" />
+        <StatCard label="Потвърдени" value={monthStats.confirmed} />
+        <StatCard label="Завършени" value={monthStats.completed} />
+        <StatCard label="Отказани" value={monthStats.cancelled} />
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6">
       <div className="rounded-xl border bg-card p-5 flex justify-center">
         <Calendar
           mode="single"
@@ -222,6 +263,49 @@ function CalendarTab() {
           ))}
         </div>
       </div>
+      </div>
+
+      <div className="rounded-xl border bg-card p-5">
+        <h3 className="font-display text-lg text-mauve mb-3">Месечен отчет — {monthLabel}</h3>
+        {monthStats.byDay.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Няма резервации за този месец.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-mauve">
+                <tr className="border-b border-border/50">
+                  <th className="text-left py-2">Дата</th>
+                  <th className="text-right py-2">Брой резервации</th>
+                </tr>
+              </thead>
+              <tbody>
+                {monthStats.byDay.map((d) => (
+                  <tr key={d.date} className="border-b border-border/30 last:border-0">
+                    <td className="py-2">{formatDateBG(d.date)}</td>
+                    <td className="py-2 text-right font-medium">{d.count}</td>
+                  </tr>
+                ))}
+                <tr className="font-semibold text-mauve">
+                  <td className="py-2">Общо</td>
+                  <td className="py-2 text-right">{monthStats.total}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, accent }: { label: string; value: number; accent?: "primary" }) {
+  return (
+    <div className={cn(
+      "rounded-xl border bg-card p-4",
+      accent === "primary" && "border-primary/40 bg-primary/5",
+    )}>
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-2xl font-display text-mauve mt-1">{value}</div>
     </div>
   );
 }
