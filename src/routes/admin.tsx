@@ -26,22 +26,60 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-const ADMIN_USER = "RUSEVANAILS";
-const ADMIN_PASS = "123456789a";
-const STORAGE_KEY = "rn_admin_auth";
+type AdminAuthState = "loading" | "signed_out" | "forbidden" | "ready";
 
 function AdminPage() {
-  const [authed, setAuthed] = useState(false);
-  const [ready, setReady] = useState(false);
+  const [authState, setAuthState] = useState<AdminAuthState>("loading");
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setAuthed(sessionStorage.getItem(STORAGE_KEY) === "1");
-    }
-    setReady(true);
+    const syncAuthState = async () => {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error || !user) {
+        setAuthState("signed_out");
+        return;
+      }
+
+      const { data: roles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+
+      if (rolesError) {
+        toast.error(getAdminErrorMessage(rolesError, "Неуспешна проверка на админ достъпа."));
+        setAuthState("signed_out");
+        return;
+      }
+
+      setAuthState(roles?.some((role) => role.role === "admin") ? "ready" : "forbidden");
+    };
+
+    void syncAuthState();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      void syncAuthState();
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  if (!ready) {
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error(getAdminErrorMessage(error, "Неуспешен изход от админ панела."));
+      return;
+    }
+
+    toast.success("Излязохте успешно.");
+    setAuthState("signed_out");
+  };
+
+  if (authState === "loading") {
     return (
       <div className="min-h-screen flex flex-col">
         <SiteHeader />
@@ -50,31 +88,66 @@ function AdminPage() {
     );
   }
 
-  if (!authed) return <LoginForm onSuccess={() => setAuthed(true)} />;
+  if (authState === "signed_out") {
+    return <LoginForm onSuccess={() => setAuthState("ready")} />;
+  }
 
-  return (
-    <AdminDashboard
-      onLogout={() => {
-        sessionStorage.removeItem(STORAGE_KEY);
-        setAuthed(false);
-      }}
-    />
-  );
+  if (authState === "forbidden") {
+    return <AdminAccessDenied onLogout={handleLogout} />;
+  }
+
+  return <AdminDashboard onLogout={handleLogout} />;
 }
 
 function LoginForm({ onSuccess }: { onSuccess: () => void }) {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
-      sessionStorage.setItem(STORAGE_KEY, "1");
-      toast.success("Добре дошли!");
-      onSuccess();
-    } else {
-      toast.error("Грешно потребителско име или парола");
+    setIsSubmitting(true);
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      toast.error(getLoginErrorMessage(error.message));
+      setIsSubmitting(false);
+      return;
     }
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      toast.error("Входът беше успешен, но не успях да заредя админ профила.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const { data: roles, error: rolesError } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id);
+
+    if (rolesError) {
+      toast.error(getAdminErrorMessage(rolesError, "Неуспешна проверка на админ достъпа."));
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!roles?.some((role) => role.role === "admin")) {
+      await supabase.auth.signOut();
+      toast.error("Този акаунт няма админ достъп.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    setIsSubmitting(false);
+      toast.success("Добре дошли!");
+    onSuccess();
   };
 
   return (
@@ -83,18 +156,18 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
       <main className="flex-1 container mx-auto px-4 py-12 max-w-md">
         <div className="rounded-2xl bg-card shadow-card border border-border/50 p-8">
           <h1 className="font-display text-2xl text-mauve mb-1">Админ панел</h1>
-          <p className="text-sm text-muted-foreground mb-6">Влезте със своите данни.</p>
+          <p className="text-sm text-muted-foreground mb-6">Влезте с имейла и паролата на админ акаунта.</p>
           <form onSubmit={submit} className="space-y-4">
             <div>
-              <Label htmlFor="username">Потребителско име</Label>
-              <Input id="username" type="text" required autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} className="mt-1.5" />
+              <Label htmlFor="email">Имейл</Label>
+              <Input id="email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5" />
             </div>
             <div>
               <Label htmlFor="password">Парола</Label>
               <Input id="password" type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1.5" />
             </div>
-            <Button type="submit" className="w-full rounded-full bg-gradient-primary hover:opacity-90">
-              Вход
+            <Button type="submit" disabled={isSubmitting} className="w-full rounded-full bg-gradient-primary hover:opacity-90 disabled:opacity-70">
+              {isSubmitting ? "Влизане..." : "Вход"}
             </Button>
           </form>
           <div className="mt-6 flex justify-start">
@@ -107,6 +180,54 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
       <SiteFooter />
     </div>
   );
+}
+
+function AdminAccessDenied({ onLogout }: { onLogout: () => void | Promise<void> }) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <SiteHeader />
+      <main className="flex-1 container mx-auto px-4 py-12 max-w-md">
+        <div className="rounded-2xl bg-card shadow-card border border-border/50 p-8 space-y-6">
+          <div>
+            <h1 className="font-display text-2xl text-mauve mb-1">Няма достъп</h1>
+            <p className="text-sm text-muted-foreground">Този акаунт е влязъл успешно, но няма админ права за работа с панела.</p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button onClick={() => void onLogout()} className="w-full sm:w-auto rounded-full bg-gradient-primary hover:opacity-90">
+              Изход
+            </Button>
+            <Button asChild variant="outline" className="w-full sm:w-auto rounded-full">
+              <Link to="/">Към началото</Link>
+            </Button>
+          </div>
+        </div>
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
+
+function getLoginErrorMessage(message: string) {
+  if (message.includes("Invalid login credentials")) return "Грешен имейл или парола.";
+  if (message.includes("Email not confirmed")) return "Потвърдете имейла си преди вход.";
+  return message;
+}
+
+function getAdminErrorMessage(
+  error: { message?: string } | null | undefined,
+  fallback = "Действието не можа да се изпълни."
+) {
+  const message = error?.message ?? fallback;
+
+  if (
+    message.includes("row-level security") ||
+    message.includes("permission denied") ||
+    message.includes("Unauthorized")
+  ) {
+    return "Нямате активен админ достъп. Влезте с админ акаунта и опитайте отново.";
+  }
+
+  return message;
 }
 
 /* ---------- Dashboard ---------- */
