@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Session } from "@supabase/supabase-js";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, LogOut, Plus, Trash2, ShieldAlert } from "lucide-react";
+import { CalendarIcon, LogOut, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatBGN, formatDateBG, normalizeTime, toDateKey, generateTimeSlots } from "@/lib/booking";
 
@@ -27,28 +26,22 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
+const ADMIN_USER = "RUSEVANAILS";
+const ADMIN_PASS = "123456789a";
+const STORAGE_KEY = "rn_admin_auth";
+
 function AdminPage() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [authed, setAuthed] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-    return () => subscription.unsubscribe();
+    if (typeof window !== "undefined") {
+      setAuthed(sessionStorage.getItem(STORAGE_KEY) === "1");
+    }
+    setReady(true);
   }, []);
 
-  useEffect(() => {
-    if (!session) { setIsAdmin(false); return; }
-    supabase.from("user_roles").select("role").eq("user_id", session.user.id).eq("role", "admin").maybeSingle().then(({ data }) => {
-      setIsAdmin(!!data);
-    });
-  }, [session]);
-
-  if (loading) {
+  if (!ready) {
     return (
       <div className="min-h-screen flex flex-col">
         <SiteHeader />
@@ -57,90 +50,31 @@ function AdminPage() {
     );
   }
 
-  if (!session) return <AuthForm />;
-  if (!isAdmin) return <NotAdmin email={session.user.email ?? ""} userId={session.user.id} />;
-
-  const mustChange = !session.user.user_metadata?.password_changed;
-  if (mustChange) return <ChangePasswordScreen email={session.user.email ?? ""} />;
-
-  return <AdminDashboard onLogout={() => supabase.auth.signOut()} />;
-}
-
-function ChangePasswordScreen({ email }: { email: string }) {
-  const [pwd, setPwd] = useState("");
-  const [pwd2, setPwd2] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (pwd.length < 8) { toast.error("Паролата трябва да е поне 8 символа"); return; }
-    if (pwd !== pwd2) { toast.error("Паролите не съвпадат"); return; }
-    setBusy(true);
-    const { error } = await supabase.auth.updateUser({
-      password: pwd,
-      data: { password_changed: true, password_changed_at: new Date().toISOString() },
-    });
-    setBusy(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Паролата е променена успешно. Изпратено е потвърждение на " + email);
-  };
+  if (!authed) return <LoginForm onSuccess={() => setAuthed(true)} />;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <SiteHeader />
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-md">
-        <div className="rounded-2xl bg-card shadow-card border border-border/50 p-8">
-          <ShieldAlert className="h-10 w-10 text-primary mb-3" />
-          <h1 className="font-display text-2xl text-mauve mb-1">Смяна на парола</h1>
-          <p className="text-sm text-muted-foreground mb-6">
-            Използвате временна парола. От съображения за сигурност, моля задайте нова, преди да продължите.
-          </p>
-          <form onSubmit={submit} className="space-y-4">
-            <div>
-              <Label htmlFor="np">Нова парола</Label>
-              <Input id="np" type="password" required minLength={8} value={pwd} onChange={(e) => setPwd(e.target.value)} className="mt-1.5" />
-            </div>
-            <div>
-              <Label htmlFor="np2">Повторете паролата</Label>
-              <Input id="np2" type="password" required minLength={8} value={pwd2} onChange={(e) => setPwd2(e.target.value)} className="mt-1.5" />
-            </div>
-            <Button type="submit" disabled={busy} className="w-full rounded-full bg-gradient-primary hover:opacity-90">
-              {busy ? "Запазване..." : "Запази нова парола"}
-            </Button>
-          </form>
-          <button onClick={() => supabase.auth.signOut()} className="mt-4 text-sm text-muted-foreground hover:underline w-full text-center">
-            Изход
-          </button>
-        </div>
-      </main>
-      <SiteFooter />
-    </div>
+    <AdminDashboard
+      onLogout={() => {
+        sessionStorage.removeItem(STORAGE_KEY);
+        setAuthed(false);
+      }}
+    />
   );
 }
 
-/* ---------- Auth ---------- */
-
-function AuthForm() {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("");
+function LoginForm({ onSuccess }: { onSuccess: () => void }) {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true);
-    if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({
-        email, password,
-        options: { emailRedirectTo: `${window.location.origin}/admin` },
-      });
-      if (error) toast.error(error.message);
-      else toast.success("Акаунтът е създаден. Помолете админ да Ви даде права.");
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+      sessionStorage.setItem(STORAGE_KEY, "1");
+      toast.success("Добре дошли!");
+      onSuccess();
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) toast.error(error.message);
+      toast.error("Грешно потребителско име или парола");
     }
-    setBusy(false);
   };
 
   return (
@@ -149,48 +83,20 @@ function AuthForm() {
       <main className="flex-1 container mx-auto px-4 py-12 max-w-md">
         <div className="rounded-2xl bg-card shadow-card border border-border/50 p-8">
           <h1 className="font-display text-2xl text-mauve mb-1">Админ панел</h1>
-          <p className="text-sm text-muted-foreground mb-6">{mode === "signin" ? "Влезте в акаунта си." : "Създайте админ акаунт."}</p>
+          <p className="text-sm text-muted-foreground mb-6">Влезте със своите данни.</p>
           <form onSubmit={submit} className="space-y-4">
             <div>
-              <Label htmlFor="email">Имейл</Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5" />
+              <Label htmlFor="username">Потребителско име</Label>
+              <Input id="username" type="text" required autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} className="mt-1.5" />
             </div>
             <div>
               <Label htmlFor="password">Парола</Label>
-              <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1.5" />
+              <Input id="password" type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1.5" />
             </div>
-            <Button type="submit" disabled={busy} className="w-full rounded-full bg-gradient-primary hover:opacity-90">
-              {busy ? "Моля, изчакайте..." : mode === "signin" ? "Вход" : "Регистрация"}
+            <Button type="submit" className="w-full rounded-full bg-gradient-primary hover:opacity-90">
+              Вход
             </Button>
           </form>
-          <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="mt-4 text-sm text-mauve hover:underline w-full text-center">
-            {mode === "signin" ? "Нямате акаунт? Регистрирайте се" : "Вече имате акаунт? Влезте"}
-          </button>
-        </div>
-      </main>
-      <SiteFooter />
-    </div>
-  );
-}
-
-function NotAdmin({ email, userId }: { email: string; userId: string }) {
-  return (
-    <div className="min-h-screen flex flex-col">
-      <SiteHeader />
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-md">
-        <div className="rounded-2xl bg-card shadow-card border border-border/50 p-8 text-center">
-          <ShieldAlert className="h-12 w-12 text-primary mx-auto mb-3" />
-          <h1 className="font-display text-2xl text-mauve">Нямате админ права</h1>
-          <p className="text-sm text-muted-foreground mt-2">
-            Влезли сте като <strong>{email}</strong>. За да получите достъп до админ панела, изпълнете SQL заявката по-долу в Lovable Cloud:
-          </p>
-          <pre className="mt-4 text-left text-xs bg-secondary p-3 rounded-lg overflow-x-auto">
-{`INSERT INTO public.user_roles (user_id, role)
-VALUES ('${userId}', 'admin');`}
-          </pre>
-          <Button onClick={() => supabase.auth.signOut()} variant="outline" className="mt-6 rounded-full">
-            <LogOut className="mr-2 h-4 w-4" /> Изход
-          </Button>
         </div>
       </main>
       <SiteFooter />
@@ -219,20 +125,103 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           <Button variant="outline" onClick={onLogout} className="rounded-full"><LogOut className="mr-2 h-4 w-4" /> Изход</Button>
         </div>
 
-        <Tabs defaultValue="bookings">
+        <Tabs defaultValue="calendar">
           <TabsList className="bg-secondary flex w-full overflow-x-auto h-auto flex-wrap sm:flex-nowrap">
+            <TabsTrigger value="calendar" className="flex-1 min-w-fit text-xs sm:text-sm">Календар</TabsTrigger>
             <TabsTrigger value="bookings" className="flex-1 min-w-fit text-xs sm:text-sm">Резервации</TabsTrigger>
             <TabsTrigger value="specialists" className="flex-1 min-w-fit text-xs sm:text-sm">Специалисти</TabsTrigger>
             <TabsTrigger value="services" className="flex-1 min-w-fit text-xs sm:text-sm">Услуги</TabsTrigger>
             <TabsTrigger value="blocked" className="flex-1 min-w-fit text-xs sm:text-sm">Блокирани</TabsTrigger>
           </TabsList>
+          <TabsContent value="calendar"><CalendarTab /></TabsContent>
           <TabsContent value="bookings"><BookingsTab /></TabsContent>
           <TabsContent value="specialists"><SpecialistsTab /></TabsContent>
           <TabsContent value="services"><ServicesTab /></TabsContent>
           <TabsContent value="blocked"><BlockedTab /></TabsContent>
         </Tabs>
+
       </main>
       <SiteFooter />
+    </div>
+  );
+}
+
+function CalendarTab() {
+  const [selected, setSelected] = useState<Date | undefined>(new Date());
+  const [rows, setRows] = useState<BookingRow[] | null>(null);
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("bookings")
+      .select("id,client_name,client_email,client_phone,booking_date,booking_time,status,specialists(name),services(name,price)")
+      .order("booking_date")
+      .order("booking_time");
+    setRows((data ?? []) as any);
+  };
+  useEffect(() => { load(); }, []);
+
+  const bookedDays = useMemo(() => {
+    const set = new Set<string>();
+    rows?.forEach((r) => { if (r.status !== "cancelled") set.add(r.booking_date); });
+    return Array.from(set).map((d) => {
+      const [y, m, day] = d.split("-").map(Number);
+      return new Date(y, m - 1, day);
+    });
+  }, [rows]);
+
+  const dayBookings = useMemo(() => {
+    if (!selected || !rows) return [];
+    const key = toDateKey(selected);
+    return rows.filter((r) => r.booking_date === key);
+  }, [selected, rows]);
+
+  return (
+    <div className="mt-6 grid lg:grid-cols-2 gap-6">
+      <div className="rounded-xl border bg-card p-5 flex justify-center">
+        <Calendar
+          mode="single"
+          selected={selected}
+          onSelect={setSelected}
+          modifiers={{ booked: bookedDays }}
+          modifiersClassNames={{
+            booked: "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1.5 after:w-1.5 after:rounded-full after:bg-primary",
+          }}
+          className="p-3 pointer-events-auto"
+        />
+      </div>
+      <div className="rounded-xl border bg-card p-5">
+        <h3 className="font-display text-lg text-mauve mb-3">
+          {selected ? formatDateBG(selected) : "Изберете дата"}
+        </h3>
+        {rows === null && <Skeleton className="h-24 w-full" />}
+        {rows !== null && dayBookings.length === 0 && (
+          <p className="text-sm text-muted-foreground">Няма резервации за този ден.</p>
+        )}
+        <div className="space-y-2">
+          {dayBookings.map((b) => (
+            <div key={b.id} className="flex items-start justify-between gap-3 p-3 rounded-lg border bg-background">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-mauve">{normalizeTime(b.booking_time)}</span>
+                  <span className={cn(
+                    "text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full",
+                    b.status === "confirmed" && "bg-primary/10 text-primary",
+                    b.status === "completed" && "bg-emerald-500/10 text-emerald-600",
+                    b.status === "cancelled" && "bg-destructive/10 text-destructive line-through",
+                  )}>
+                    {b.status === "confirmed" ? "потвърдена" : b.status === "completed" ? "завършена" : "отказана"}
+                  </span>
+                </div>
+                <div className="text-sm">{b.client_name}</div>
+                <div className="text-xs text-muted-foreground truncate">
+                  {b.specialists?.name} • {b.services?.name}
+                </div>
+                <div className="text-xs text-muted-foreground truncate">{b.client_phone} • {b.client_email}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
