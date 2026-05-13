@@ -125,18 +125,21 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           <Button variant="outline" onClick={onLogout} className="rounded-full"><LogOut className="mr-2 h-4 w-4" /> Изход</Button>
         </div>
 
-        <Tabs defaultValue="bookings">
+        <Tabs defaultValue="calendar">
           <TabsList className="bg-secondary flex w-full overflow-x-auto h-auto flex-wrap sm:flex-nowrap">
+            <TabsTrigger value="calendar" className="flex-1 min-w-fit text-xs sm:text-sm">Календар</TabsTrigger>
             <TabsTrigger value="bookings" className="flex-1 min-w-fit text-xs sm:text-sm">Резервации</TabsTrigger>
             <TabsTrigger value="specialists" className="flex-1 min-w-fit text-xs sm:text-sm">Специалисти</TabsTrigger>
             <TabsTrigger value="services" className="flex-1 min-w-fit text-xs sm:text-sm">Услуги</TabsTrigger>
             <TabsTrigger value="blocked" className="flex-1 min-w-fit text-xs sm:text-sm">Блокирани</TabsTrigger>
           </TabsList>
+          <TabsContent value="calendar"><CalendarTab /></TabsContent>
           <TabsContent value="bookings"><BookingsTab /></TabsContent>
           <TabsContent value="specialists"><SpecialistsTab /></TabsContent>
           <TabsContent value="services"><ServicesTab /></TabsContent>
           <TabsContent value="blocked"><BlockedTab /></TabsContent>
         </Tabs>
+
       </main>
       <SiteFooter />
     </div>
