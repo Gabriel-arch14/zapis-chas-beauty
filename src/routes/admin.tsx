@@ -502,7 +502,7 @@ function BookingsTab() {
 
   const updateStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
-    if (error) toast.error(error.message); else { toast.success("Статусът е обновен"); load(); }
+    if (error) toast.error(getAdminErrorMessage(error)); else { toast.success("Статусът е обновен"); load(); }
   };
 
   return (
@@ -625,14 +625,14 @@ function SpecialistsTab() {
   const add = async () => {
     if (!form.name || !form.specialty) { toast.error("Попълнете име и специалност"); return; }
     const { error } = await supabase.from("specialists").insert(form);
-    if (error) toast.error(error.message);
+    if (error) toast.error(getAdminErrorMessage(error));
     else { toast.success("Добавен"); setForm({ name: "", specialty: "", photo_url: "", bio: "" }); load(); }
   };
 
   const remove = async (id: string) => {
     if (!confirm("Изтриване на специалиста?")) return;
     const { error } = await supabase.from("specialists").delete().eq("id", id);
-    if (error) toast.error(error.message); else { toast.success("Изтрит"); load(); }
+    if (error) toast.error(getAdminErrorMessage(error)); else { toast.success("Изтрит"); load(); }
   };
 
   return (
