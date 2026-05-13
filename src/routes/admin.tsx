@@ -121,22 +121,40 @@ interface SpecialistRow { id: string; name: string; specialty: string; photo_url
 interface ServiceRow { id: string; specialist_id: string; name: string; duration_minutes: number; price: number; }
 
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
+  const [tab, setTab] = useState("calendar");
+  const tabs = [
+    { value: "calendar", label: "Календар" },
+    { value: "bookings", label: "Резервации" },
+    { value: "specialists", label: "Специалисти" },
+    { value: "services", label: "Услуги" },
+    { value: "blocked", label: "Блокирани" },
+  ];
   return (
     <div className="min-h-screen flex flex-col">
       <SiteHeader />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <h1 className="font-display text-2xl sm:text-3xl text-mauve">Админ панел</h1>
-          <Button variant="outline" onClick={onLogout} className="rounded-full"><LogOut className="mr-2 h-4 w-4" /> Изход</Button>
+      <main className="flex-1 container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <div className="flex items-center justify-between gap-3 mb-5 sm:mb-6">
+          <h1 className="font-display text-xl sm:text-3xl text-mauve">Админ панел</h1>
+          <Button variant="outline" onClick={onLogout} size="sm" className="rounded-full sm:size-default">
+            <LogOut className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Изход</span>
+          </Button>
         </div>
 
-        <Tabs defaultValue="calendar">
-          <TabsList className="bg-secondary flex w-full overflow-x-auto h-auto flex-wrap sm:flex-nowrap">
-            <TabsTrigger value="calendar" className="flex-1 min-w-fit text-xs sm:text-sm">Календар</TabsTrigger>
-            <TabsTrigger value="bookings" className="flex-1 min-w-fit text-xs sm:text-sm">Резервации</TabsTrigger>
-            <TabsTrigger value="specialists" className="flex-1 min-w-fit text-xs sm:text-sm">Специалисти</TabsTrigger>
-            <TabsTrigger value="services" className="flex-1 min-w-fit text-xs sm:text-sm">Услуги</TabsTrigger>
-            <TabsTrigger value="blocked" className="flex-1 min-w-fit text-xs sm:text-sm">Блокирани</TabsTrigger>
+        <Tabs value={tab} onValueChange={setTab}>
+          {/* Mobile: dropdown selector — easier than tiny tabs */}
+          <div className="sm:hidden mb-4">
+            <Select value={tab} onValueChange={setTab}>
+              <SelectTrigger className="w-full h-12 text-base"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {tabs.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <TabsList className="hidden sm:flex bg-secondary w-full overflow-x-auto h-auto">
+            {tabs.map((t) => (
+              <TabsTrigger key={t.value} value={t.value} className="flex-1 min-w-fit text-sm">{t.label}</TabsTrigger>
+            ))}
           </TabsList>
           <TabsContent value="calendar"><CalendarTab /></TabsContent>
           <TabsContent value="bookings"><BookingsTab /></TabsContent>
@@ -331,9 +349,9 @@ function BookingsTab() {
 
   return (
     <div className="mt-6 space-y-4">
-      <div className="flex flex-wrap gap-3 items-center">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-44"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Всички статуси</SelectItem>
             <SelectItem value="confirmed">Потвърдени</SelectItem>
@@ -354,13 +372,14 @@ function BookingsTab() {
       </div>
 
       <div className="rounded-xl border bg-card overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-secondary text-mauve">
               <tr>
                 <th className="text-left p-3">Дата / Час</th>
                 <th className="text-left p-3">Клиент</th>
-                <th className="text-left p-3 hidden md:table-cell">Контакти</th>
+                <th className="text-left p-3">Контакти</th>
                 <th className="text-left p-3">Специалист / Услуга</th>
                 <th className="text-left p-3">Статус</th>
               </tr>
@@ -375,7 +394,7 @@ function BookingsTab() {
                     <div className="text-xs text-muted-foreground">{normalizeTime(r.booking_time)}</div>
                   </td>
                   <td className="p-3">{r.client_name}</td>
-                  <td className="p-3 hidden md:table-cell text-xs text-muted-foreground">
+                  <td className="p-3 text-xs text-muted-foreground">
                     <div>{r.client_email}</div><div>{r.client_phone}</div>
                   </td>
                   <td className="p-3">
@@ -396,6 +415,39 @@ function BookingsTab() {
               ))}
             </tbody>
           </table>
+        </div>
+        {/* Mobile cards */}
+        <div className="md:hidden divide-y divide-border/50">
+          {rows === null && <div className="p-4"><Skeleton className="h-20 w-full" /></div>}
+          {rows?.length === 0 && <div className="p-6 text-center text-sm text-muted-foreground">Няма резервации.</div>}
+          {rows?.map((r) => (
+            <div key={r.id} className="p-4 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="font-medium text-mauve">{formatDateBG(r.booking_date)}</div>
+                  <div className="text-xs text-muted-foreground">{normalizeTime(r.booking_time)}</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium text-sm">{r.client_name}</div>
+                  {r.services && <div className="text-xs text-muted-foreground">{formatBGN(r.services.price)}</div>}
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {r.specialists?.name} • {r.services?.name}
+              </div>
+              <div className="text-xs text-muted-foreground break-all">
+                {r.client_phone} • {r.client_email}
+              </div>
+              <Select value={r.status} onValueChange={(v) => updateStatus(r.id, v)}>
+                <SelectTrigger className="w-full h-10"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="confirmed">Потвърдена</SelectItem>
+                  <SelectItem value="completed">Завършена</SelectItem>
+                  <SelectItem value="cancelled">Отказана</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -433,7 +485,7 @@ function SpecialistsTab() {
         <Input placeholder="Специалност" value={form.specialty} onChange={(e) => setForm({ ...form, specialty: e.target.value })} />
         <Input placeholder="URL на снимка" value={form.photo_url} onChange={(e) => setForm({ ...form, photo_url: e.target.value })} />
         <Input placeholder="Кратко описание" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
-        <Button onClick={add} className="rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Добави</Button>
+        <Button onClick={add} className="w-full sm:w-auto rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Добави</Button>
       </div>
       <div className="rounded-xl border bg-card p-5">
         <h3 className="font-display text-lg text-mauve mb-3">Списък</h3>
@@ -497,7 +549,7 @@ function ServicesTab() {
           <div><Label className="text-xs">Времетраене (мин.)</Label><Input type="number" min={15} step={15} value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: parseInt(e.target.value) || 30 })} /></div>
           <div><Label className="text-xs">Цена (лв.) — показва се в €</Label><Input type="number" min={0} step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} /></div>
         </div>
-        <Button onClick={add} className="rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Добави</Button>
+        <Button onClick={add} className="w-full sm:w-auto rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Добави</Button>
       </div>
       <div className="rounded-xl border bg-card p-5">
         <h3 className="font-display text-lg text-mauve mb-3">Списък</h3>
@@ -578,7 +630,7 @@ function BlockedTab() {
             {slots.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>
-        <Button onClick={add} className="rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Блокирай</Button>
+        <Button onClick={add} className="w-full sm:w-auto rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Блокирай</Button>
       </div>
       <div className="rounded-xl border bg-card p-5">
         <h3 className="font-display text-lg text-mauve mb-3">Блокирани</h3>
