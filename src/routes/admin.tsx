@@ -355,11 +355,12 @@ function CalendarTab() {
 function StatCard({ label, value, accent }: { label: string; value: number; accent?: "primary" }) {
   return (
     <div className={cn(
-      "rounded-xl border bg-card p-4",
-      accent === "primary" && "border-primary/40 bg-primary/5",
+      "rounded-md border border-slate-800 bg-slate-900 p-4 relative overflow-hidden",
+      accent === "primary" && "border-emerald-500/40",
     )}>
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="text-2xl font-display text-mauve mt-1">{value}</div>
+      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400 truncate">{label}</div>
+      <div className="font-mono text-3xl tabular-nums text-slate-50 mt-2">{value.toString().padStart(2, "0")}</div>
+      {accent === "primary" && <div className="absolute top-0 left-0 h-full w-0.5 bg-emerald-400" />}
     </div>
   );
 }
