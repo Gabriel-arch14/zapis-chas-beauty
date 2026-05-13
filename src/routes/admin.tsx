@@ -546,7 +546,7 @@ function SpecialistsTab() {
 function ServicesTab() {
   const [specialists, setSpecialists] = useState<SpecialistRow[]>([]);
   const [services, setServices] = useState<ServiceRow[] | null>(null);
-  const [form, setForm] = useState({ specialist_id: "", name: "", duration_minutes: 30, price: 0 });
+  const [form, setForm] = useState<{ specialist_id: string; name: string; duration_minutes: string; price: string }>({ specialist_id: "", name: "", duration_minutes: "30", price: "0" });
 
   const load = async () => {
     const [{ data: sp }, { data: svc }] = await Promise.all([
@@ -560,9 +560,11 @@ function ServicesTab() {
 
   const add = async () => {
     if (!form.specialist_id || !form.name) { toast.error("Изберете специалист и въведете име"); return; }
-    const { error } = await supabase.from("services").insert(form);
+    const duration_minutes = parseInt(form.duration_minutes) || 30;
+    const price = parseFloat(form.price) || 0;
+    const { error } = await supabase.from("services").insert({ specialist_id: form.specialist_id, name: form.name, duration_minutes, price });
     if (error) toast.error(error.message);
-    else { toast.success("Добавена"); setForm({ specialist_id: "", name: "", duration_minutes: 30, price: 0 }); load(); }
+    else { toast.success("Добавена"); setForm({ specialist_id: "", name: "", duration_minutes: "30", price: "0" }); load(); }
   };
 
   const remove = async (id: string) => {
@@ -583,8 +585,8 @@ function ServicesTab() {
         </Select>
         <Input placeholder="Име на услугата" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         <div className="grid grid-cols-2 gap-3">
-          <div><Label className="text-xs">Времетраене (мин.)</Label><Input type="number" min={15} step={15} value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: parseInt(e.target.value) || 30 })} /></div>
-          <div><Label className="text-xs">Цена (лв.) — показва се в €</Label><Input type="number" min={0} step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} /></div>
+          <div><Label className="text-xs">Времетраене (мин.)</Label><Input type="number" min={0} step={15} value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: e.target.value })} /></div>
+          <div><Label className="text-xs">Цена (€)</Label><Input type="number" min={0} step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
         </div>
         <Button onClick={add} className="w-full sm:w-auto rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Добави</Button>
       </div>
