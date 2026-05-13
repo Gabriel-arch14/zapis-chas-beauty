@@ -97,6 +97,11 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
               Вход
             </Button>
           </form>
+          <div className="mt-6 flex justify-start">
+            <Link to="/" className="text-sm text-muted-foreground hover:text-mauve inline-flex items-center gap-1">
+              ← Назад към Начало
+            </Link>
+          </div>
         </div>
       </main>
       <SiteFooter />
