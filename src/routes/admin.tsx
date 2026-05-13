@@ -546,7 +546,7 @@ function SpecialistsTab() {
 function ServicesTab() {
   const [specialists, setSpecialists] = useState<SpecialistRow[]>([]);
   const [services, setServices] = useState<ServiceRow[] | null>(null);
-  const [form, setForm] = useState({ specialist_id: "", name: "", duration_minutes: 30, price: 0 });
+  const [form, setForm] = useState<{ specialist_id: string; name: string; duration_minutes: string; price: string }>({ specialist_id: "", name: "", duration_minutes: "30", price: "0" });
 
   const load = async () => {
     const [{ data: sp }, { data: svc }] = await Promise.all([
