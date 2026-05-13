@@ -188,6 +188,38 @@ function Index() {
         </Link>
       </section>
 
+      {/* Services */}
+      <section id="services" className="py-20 sm:py-24 bg-secondary/30 scroll-mt-20 border-b border-border">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">Услуги</p>
+            <h2 className="text-3xl sm:text-4xl font-display font-semibold text-foreground">Услуги и цени</h2>
+            <p className="mt-3 text-muted-foreground">Подбрани процедури за безупречен резултат</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border max-w-5xl mx-auto border border-border">
+            {SERVICES.map((s) => (
+              <div key={s.name} className="bg-card p-6 sm:p-7 transition-smooth hover:bg-background">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <h3 className="font-display text-xl text-foreground">{s.name}</h3>
+                  <span className="text-sm font-medium text-foreground whitespace-nowrap">{s.price}</span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button asChild size="lg" className="rounded-none h-12 px-8 bg-foreground text-background hover:bg-foreground/85">
+              <Link to="/specialists">
+                Виж свободните часове
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Gallery */}
       <section id="gallery" className="py-20 sm:py-24 border-b border-border bg-background scroll-mt-20">
         <div className="container mx-auto px-4">
@@ -223,38 +255,6 @@ function Index() {
           </div>
         </div>
 
-      </section>
-
-      {/* Services */}
-      <section id="services" className="py-20 sm:py-24 bg-secondary/30 scroll-mt-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">Услуги</p>
-            <h2 className="text-3xl sm:text-4xl font-display font-semibold text-foreground">Услуги и цени</h2>
-            <p className="mt-3 text-muted-foreground">Подбрани процедури за безупречен резултат</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border max-w-5xl mx-auto border border-border">
-            {SERVICES.map((s) => (
-              <div key={s.name} className="bg-card p-6 sm:p-7 transition-smooth hover:bg-background">
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <h3 className="font-display text-xl text-foreground">{s.name}</h3>
-                  <span className="text-sm font-medium text-foreground whitespace-nowrap">{s.price}</span>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Button asChild size="lg" className="rounded-none h-12 px-8 bg-foreground text-background hover:bg-foreground/85">
-              <Link to="/specialists">
-                Запази час
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
       </section>
 
       {/* About */}
