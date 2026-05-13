@@ -372,13 +372,14 @@ function BookingsTab() {
       </div>
 
       <div className="rounded-xl border bg-card overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-secondary text-mauve">
               <tr>
                 <th className="text-left p-3">Дата / Час</th>
                 <th className="text-left p-3">Клиент</th>
-                <th className="text-left p-3 hidden md:table-cell">Контакти</th>
+                <th className="text-left p-3">Контакти</th>
                 <th className="text-left p-3">Специалист / Услуга</th>
                 <th className="text-left p-3">Статус</th>
               </tr>
@@ -393,7 +394,7 @@ function BookingsTab() {
                     <div className="text-xs text-muted-foreground">{normalizeTime(r.booking_time)}</div>
                   </td>
                   <td className="p-3">{r.client_name}</td>
-                  <td className="p-3 hidden md:table-cell text-xs text-muted-foreground">
+                  <td className="p-3 text-xs text-muted-foreground">
                     <div>{r.client_email}</div><div>{r.client_phone}</div>
                   </td>
                   <td className="p-3">
@@ -414,6 +415,39 @@ function BookingsTab() {
               ))}
             </tbody>
           </table>
+        </div>
+        {/* Mobile cards */}
+        <div className="md:hidden divide-y divide-border/50">
+          {rows === null && <div className="p-4"><Skeleton className="h-20 w-full" /></div>}
+          {rows?.length === 0 && <div className="p-6 text-center text-sm text-muted-foreground">Няма резервации.</div>}
+          {rows?.map((r) => (
+            <div key={r.id} className="p-4 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="font-medium text-mauve">{formatDateBG(r.booking_date)}</div>
+                  <div className="text-xs text-muted-foreground">{normalizeTime(r.booking_time)}</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium text-sm">{r.client_name}</div>
+                  {r.services && <div className="text-xs text-muted-foreground">{formatBGN(r.services.price)}</div>}
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {r.specialists?.name} • {r.services?.name}
+              </div>
+              <div className="text-xs text-muted-foreground break-all">
+                {r.client_phone} • {r.client_email}
+              </div>
+              <Select value={r.status} onValueChange={(v) => updateStatus(r.id, v)}>
+                <SelectTrigger className="w-full h-10"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="confirmed">Потвърдена</SelectItem>
+                  <SelectItem value="completed">Завършена</SelectItem>
+                  <SelectItem value="cancelled">Отказана</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
         </div>
       </div>
     </div>
