@@ -263,6 +263,49 @@ function CalendarTab() {
           ))}
         </div>
       </div>
+      </div>
+
+      <div className="rounded-xl border bg-card p-5">
+        <h3 className="font-display text-lg text-mauve mb-3">Месечен отчет — {monthLabel}</h3>
+        {monthStats.byDay.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Няма резервации за този месец.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-mauve">
+                <tr className="border-b border-border/50">
+                  <th className="text-left py-2">Дата</th>
+                  <th className="text-right py-2">Брой резервации</th>
+                </tr>
+              </thead>
+              <tbody>
+                {monthStats.byDay.map((d) => (
+                  <tr key={d.date} className="border-b border-border/30 last:border-0">
+                    <td className="py-2">{formatDateBG(d.date)}</td>
+                    <td className="py-2 text-right font-medium">{d.count}</td>
+                  </tr>
+                ))}
+                <tr className="font-semibold text-mauve">
+                  <td className="py-2">Общо</td>
+                  <td className="py-2 text-right">{monthStats.total}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, accent }: { label: string; value: number; accent?: "primary" }) {
+  return (
+    <div className={cn(
+      "rounded-xl border bg-card p-4",
+      accent === "primary" && "border-primary/40 bg-primary/5",
+    )}>
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-2xl font-display text-mauve mt-1">{value}</div>
     </div>
   );
 }
