@@ -349,9 +349,9 @@ function BookingsTab() {
 
   return (
     <div className="mt-6 space-y-4">
-      <div className="flex flex-wrap gap-3 items-center">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-44"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Всички статуси</SelectItem>
             <SelectItem value="confirmed">Потвърдени</SelectItem>
@@ -485,7 +485,7 @@ function SpecialistsTab() {
         <Input placeholder="Специалност" value={form.specialty} onChange={(e) => setForm({ ...form, specialty: e.target.value })} />
         <Input placeholder="URL на снимка" value={form.photo_url} onChange={(e) => setForm({ ...form, photo_url: e.target.value })} />
         <Input placeholder="Кратко описание" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
-        <Button onClick={add} className="rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Добави</Button>
+        <Button onClick={add} className="w-full sm:w-auto rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Добави</Button>
       </div>
       <div className="rounded-xl border bg-card p-5">
         <h3 className="font-display text-lg text-mauve mb-3">Списък</h3>
@@ -549,7 +549,7 @@ function ServicesTab() {
           <div><Label className="text-xs">Времетраене (мин.)</Label><Input type="number" min={15} step={15} value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: parseInt(e.target.value) || 30 })} /></div>
           <div><Label className="text-xs">Цена (лв.) — показва се в €</Label><Input type="number" min={0} step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })} /></div>
         </div>
-        <Button onClick={add} className="rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Добави</Button>
+        <Button onClick={add} className="w-full sm:w-auto rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Добави</Button>
       </div>
       <div className="rounded-xl border bg-card p-5">
         <h3 className="font-display text-lg text-mauve mb-3">Списък</h3>
@@ -630,7 +630,7 @@ function BlockedTab() {
             {slots.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>
-        <Button onClick={add} className="rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Блокирай</Button>
+        <Button onClick={add} className="w-full sm:w-auto rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Блокирай</Button>
       </div>
       <div className="rounded-xl border bg-card p-5">
         <h3 className="font-display text-lg text-mauve mb-3">Блокирани</h3>
