@@ -246,6 +246,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [tab, setTab] = useState("calendar");
   const tabs = [
     { value: "calendar", label: "Календар" },
+    { value: "slots", label: "Часове" },
     { value: "bookings", label: "Резервации" },
     { value: "specialists", label: "Специалисти" },
     { value: "services", label: "Услуги" },
