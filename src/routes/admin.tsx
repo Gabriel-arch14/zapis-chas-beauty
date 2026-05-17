@@ -157,11 +157,11 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
       <main className="flex-1 container mx-auto px-4 py-12 max-w-md">
         <div className="rounded-2xl bg-card shadow-card border border-border/50 p-8">
           <h1 className="font-display text-2xl text-mauve mb-1">Админ панел</h1>
-          <p className="text-sm text-muted-foreground mb-6">Влезте с имейла и паролата на админ акаунта.</p>
+          <p className="text-sm text-muted-foreground mb-6">Влезте с потребителското име и паролата на админ акаунта.</p>
           <form onSubmit={submit} className="space-y-4">
             <div>
-              <Label htmlFor="email">Имейл</Label>
-              <Input id="email" type="text" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5" />
+              <Label htmlFor="email">Потребител</Label>
+              <Input id="email" type="text" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5" />
             </div>
             <div>
               <Label htmlFor="password">Парола</Label>
