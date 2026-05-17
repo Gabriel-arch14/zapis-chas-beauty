@@ -160,7 +160,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           <form onSubmit={submit} className="space-y-4">
             <div>
               <Label htmlFor="email">Имейл</Label>
-              <Input id="email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5" />
+              <Input id="email" type="text" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5" />
             </div>
             <div>
               <Label htmlFor="password">Парола</Label>
