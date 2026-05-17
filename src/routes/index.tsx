@@ -481,16 +481,6 @@ function Index() {
         </div>
       )}
 
-      {/* Sticky mobile CTA */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-        <Button asChild size="lg" className="w-full h-12 rounded-none bg-foreground text-background hover:bg-foreground/85">
-          <Link to="/specialists">
-            Виж свободните часове
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </div>
-      <div className="lg:hidden h-20" aria-hidden="true" />
 
       <SiteFooter />
     </div>
