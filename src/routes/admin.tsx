@@ -246,6 +246,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [tab, setTab] = useState("calendar");
   const tabs = [
     { value: "calendar", label: "Календар" },
+    { value: "slots", label: "Часове" },
     { value: "bookings", label: "Резервации" },
     { value: "specialists", label: "Специалисти" },
     { value: "services", label: "Услуги" },
@@ -307,6 +308,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           </TabsList>
           <div className="[&_.bg-card]:bg-white [&_.bg-card]:border-slate-200 [&_.bg-background]:bg-slate-50 [&_.text-mauve]:text-slate-900 [&_.bg-secondary]:bg-slate-100 [&_table_thead]:bg-slate-100 [&_table_thead]:text-slate-700 [&_table_tbody_tr:nth-child(even)]:bg-slate-50/70">
             <TabsContent value="calendar"><CalendarTab /></TabsContent>
+            <TabsContent value="slots"><SlotsTab /></TabsContent>
             <TabsContent value="bookings"><BookingsTab /></TabsContent>
             <TabsContent value="specialists"><SpecialistsTab /></TabsContent>
             <TabsContent value="services"><ServicesTab /></TabsContent>
@@ -809,6 +811,162 @@ function BlockedTab() {
             </div>
           ))}
           {list?.length === 0 && <p className="text-sm text-muted-foreground">Няма блокирани.</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SlotsTab() {
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [time, setTime] = useState<string>("");
+  const [rangeMode, setRangeMode] = useState<"single" | "range">("single");
+  const [rangeStart, setRangeStart] = useState<string>("09:00");
+  const [rangeEnd, setRangeEnd] = useState<string>("18:00");
+  const [step, setStep] = useState<string>("30");
+  const [list, setList] = useState<any[] | null>(null);
+  const [bookedTimes, setBookedTimes] = useState<Set<string>>(new Set());
+
+  const slots = generateTimeSlots("08:00", "20:00", 30);
+
+  const load = async () => {
+    if (!date) return;
+    const key = toDateKey(date);
+    const [{ data: avail }, { data: bks }] = await Promise.all([
+      supabase.from("available_slots").select("id,slot_time,is_available").eq("slot_date", key).order("slot_time"),
+      supabase.from("bookings").select("booking_time,status").eq("booking_date", key).neq("status", "cancelled"),
+    ]);
+    setList((avail ?? []) as any);
+    setBookedTimes(new Set(((bks ?? []) as any[]).map((b) => normalizeTime(b.booking_time))));
+  };
+  useEffect(() => { load(); }, [date]);
+
+  const addOne = async (t: string) => {
+    if (!date) return;
+    const { error } = await supabase.from("available_slots").insert({
+      slot_date: toDateKey(date),
+      slot_time: t,
+      is_available: true,
+    });
+    if (error) toast.error(getAdminErrorMessage(error));
+  };
+
+  const addSingle = async () => {
+    if (!date || !time) { toast.error("Изберете дата и час"); return; }
+    await addOne(time);
+    toast.success("Часът е добавен");
+    setTime("");
+    load();
+  };
+
+  const addRange = async () => {
+    if (!date) { toast.error("Изберете дата"); return; }
+    const stepMin = Number(step);
+    if (!Number.isFinite(stepMin) || stepMin <= 0) { toast.error("Невалидна стъпка"); return; }
+    const generated = generateTimeSlots(rangeStart, rangeEnd, stepMin);
+    if (generated.length === 0) { toast.error("Невалиден интервал"); return; }
+    const existing = new Set((list ?? []).map((s: any) => normalizeTime(s.slot_time)));
+    const toInsert = generated.filter((t) => !existing.has(t)).map((t) => ({
+      slot_date: toDateKey(date),
+      slot_time: t,
+      is_available: true,
+    }));
+    if (toInsert.length === 0) { toast.info("Всички часове вече съществуват"); return; }
+    const { error } = await supabase.from("available_slots").insert(toInsert);
+    if (error) { toast.error(getAdminErrorMessage(error)); return; }
+    toast.success(`Добавени ${toInsert.length} часа`);
+    load();
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await supabase.from("available_slots").delete().eq("id", id);
+    if (error) toast.error(getAdminErrorMessage(error)); else load();
+  };
+
+  const toggleAvailable = async (id: string, current: boolean) => {
+    const { error } = await supabase.from("available_slots").update({ is_available: !current }).eq("id", id);
+    if (error) toast.error(getAdminErrorMessage(error)); else load();
+  };
+
+  return (
+    <div className="mt-6 grid lg:grid-cols-2 gap-6">
+      <div className="rounded-xl border bg-card p-5 space-y-4">
+        <h3 className="font-display text-lg text-mauve">Добавяне на свободни часове</h3>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("w-full justify-start", !date && "text-muted-foreground")}>
+              <CalendarIcon className="mr-2 h-4 w-4" />{date ? formatDateBG(date) : "Избери дата"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar mode="single" selected={date} onSelect={setDate} className="p-3 pointer-events-auto" />
+          </PopoverContent>
+        </Popover>
+
+        <div className="flex gap-2">
+          <Button type="button" size="sm" variant={rangeMode === "single" ? "default" : "outline"} onClick={() => setRangeMode("single")} className="flex-1 rounded-md">Един час</Button>
+          <Button type="button" size="sm" variant={rangeMode === "range" ? "default" : "outline"} onClick={() => setRangeMode("range")} className="flex-1 rounded-md">Интервал</Button>
+        </div>
+
+        {rangeMode === "single" ? (
+          <div className="space-y-2">
+            <Label className="text-xs">Час</Label>
+            <Select value={time} onValueChange={setTime}>
+              <SelectTrigger><SelectValue placeholder="Избери час" /></SelectTrigger>
+              <SelectContent>
+                {slots.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Button onClick={addSingle} className="w-full rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Добави час</Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="grid grid-cols-3 gap-2">
+              <div><Label className="text-xs">От</Label><Input type="time" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} /></div>
+              <div><Label className="text-xs">До</Label><Input type="time" value={rangeEnd} onChange={(e) => setRangeEnd(e.target.value)} /></div>
+              <div><Label className="text-xs">Стъпка (мин.)</Label><Input type="number" min={5} step={5} value={step} onChange={(e) => setStep(e.target.value)} /></div>
+            </div>
+            <Button onClick={addRange} className="w-full rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Генерирай часове</Button>
+          </div>
+        )}
+
+        <p className="text-xs text-muted-foreground">
+          Добавените часове се показват в сайта при онлайн записване. Когато клиент резервира час, той автоматично се маркира като резервиран и изчезва от сайта, но остава тук с етикет «резервиран».
+        </p>
+      </div>
+
+      <div className="rounded-xl border bg-card p-5">
+        <h3 className="font-display text-lg text-mauve mb-3">
+          Часове за {date ? formatDateBG(date) : "—"}
+        </h3>
+        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+          {list?.map((s) => {
+            const t = normalizeTime(s.slot_time);
+            const isBooked = bookedTimes.has(t) || !s.is_available;
+            return (
+              <div key={s.id} className="flex items-center justify-between p-3 rounded-lg border bg-background">
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-base tabular-nums">{t}</span>
+                  <span className={cn(
+                    "text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full",
+                    isBooked ? "bg-destructive/10 text-destructive" : "bg-emerald-500/10 text-emerald-600",
+                  )}>
+                    {isBooked ? "резервиран" : "свободен"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {!bookedTimes.has(t) && (
+                    <Button size="sm" variant="ghost" onClick={() => toggleAvailable(s.id, s.is_available)} className="text-xs">
+                      {s.is_available ? "Скрий" : "Възстанови"}
+                    </Button>
+                  )}
+                  <Button size="icon" variant="ghost" onClick={() => remove(s.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                </div>
+              </div>
+            );
+          })}
+          {list?.length === 0 && <p className="text-sm text-muted-foreground">Няма добавени часове за тази дата.</p>}
         </div>
       </div>
     </div>
