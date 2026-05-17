@@ -504,7 +504,16 @@ function BookingsTab() {
   useEffect(() => { load(); }, [statusFilter, dateFilter]);
 
   const updateStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
+    // Refresh the session first so an expired JWT doesn't fail the update with "Unauthorized".
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      await supabase.auth.refreshSession();
+    }
+    let { error } = await supabase.from("bookings").update({ status }).eq("id", id);
+    if (error && (error.message?.includes("JWT") || error.message?.includes("Unauthorized") || (error as { code?: string }).code === "PGRST301")) {
+      await supabase.auth.refreshSession();
+      ({ error } = await supabase.from("bookings").update({ status }).eq("id", id));
+    }
     if (error) toast.error(getAdminErrorMessage(error)); else { toast.success("Статусът е обновен"); load(); }
   };
 
