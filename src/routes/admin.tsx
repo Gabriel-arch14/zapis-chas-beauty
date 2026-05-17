@@ -108,7 +108,8 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const loginEmail = email.includes("@") ? email.trim() : `${email.trim().toLowerCase()}@admin.local`;
+    const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
 
     if (error) {
       toast.error(getLoginErrorMessage(error.message));
