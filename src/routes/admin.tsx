@@ -308,6 +308,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           </TabsList>
           <div className="[&_.bg-card]:bg-white [&_.bg-card]:border-slate-200 [&_.bg-background]:bg-slate-50 [&_.text-mauve]:text-slate-900 [&_.bg-secondary]:bg-slate-100 [&_table_thead]:bg-slate-100 [&_table_thead]:text-slate-700 [&_table_tbody_tr:nth-child(even)]:bg-slate-50/70">
             <TabsContent value="calendar"><CalendarTab /></TabsContent>
+            <TabsContent value="slots"><SlotsTab /></TabsContent>
             <TabsContent value="bookings"><BookingsTab /></TabsContent>
             <TabsContent value="specialists"><SpecialistsTab /></TabsContent>
             <TabsContent value="services"><ServicesTab /></TabsContent>
