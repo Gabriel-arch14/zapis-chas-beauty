@@ -30,7 +30,20 @@ type AdminAuthState = "loading" | "signed_out" | "forbidden" | "ready";
 
 function formatTimeInput(next: string, prev: string): string {
   if (next.length < prev.length) return next;
-  const digits = next.replace(/\D/g, "").slice(0, 4);
+  let digits = next.replace(/\D/g, "").slice(0, 4);
+  if (digits.length >= 1) {
+    // First digit can be 0-2 only
+    if (parseInt(digits[0], 10) > 2) digits = "2" + digits.slice(1);
+  }
+  if (digits.length >= 2) {
+    // Hours 00-23
+    const h = parseInt(digits.slice(0, 2), 10);
+    if (h > 23) digits = "23" + digits.slice(2);
+  }
+  if (digits.length >= 3) {
+    // First minute digit 0-5
+    if (parseInt(digits[2], 10) > 5) digits = digits.slice(0, 2) + "5" + digits.slice(3);
+  }
   if (digits.length <= 2) return digits;
   return `${digits.slice(0, 2)}:${digits.slice(2)}`;
 }
