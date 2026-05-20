@@ -28,6 +28,13 @@ export const Route = createFileRoute("/admin")({
 
 type AdminAuthState = "loading" | "signed_out" | "forbidden" | "ready";
 
+function formatTimeInput(next: string, prev: string): string {
+  if (next.length < prev.length) return next;
+  const digits = next.replace(/\D/g, "").slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+}
+
 function AdminPage() {
   const [authState, setAuthState] = useState<AdminAuthState>("loading");
 
@@ -932,8 +939,8 @@ function SlotsTab() {
         ) : (
           <div className="space-y-3">
             <div className="grid grid-cols-3 gap-2">
-              <div><Label className="text-xs">От</Label><Input type="text" inputMode="numeric" pattern="[0-9]{2}:[0-9]{2}" placeholder="09:00" maxLength={5} value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} /></div>
-              <div><Label className="text-xs">До</Label><Input type="text" inputMode="numeric" pattern="[0-9]{2}:[0-9]{2}" placeholder="18:00" maxLength={5} value={rangeEnd} onChange={(e) => setRangeEnd(e.target.value)} /></div>
+              <div><Label className="text-xs">От</Label><Input type="text" inputMode="numeric" pattern="[0-9]{2}:[0-9]{2}" placeholder="09:00" maxLength={5} value={rangeStart} onChange={(e) => setRangeStart(formatTimeInput(e.target.value, rangeStart))} /></div>
+              <div><Label className="text-xs">До</Label><Input type="text" inputMode="numeric" pattern="[0-9]{2}:[0-9]{2}" placeholder="18:00" maxLength={5} value={rangeEnd} onChange={(e) => setRangeEnd(formatTimeInput(e.target.value, rangeEnd))} /></div>
               <div><Label className="text-xs">Стъпка (мин.)</Label><Input type="number" min={5} step={5} value={step} onChange={(e) => setStep(e.target.value)} /></div>
             </div>
             <Button onClick={addRange} className="w-full rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Генерирай часове</Button>
