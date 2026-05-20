@@ -888,11 +888,27 @@ function SlotsTab() {
     load();
   };
 
+  const normalizeTimeInput = (t: string): string | null => {
+    const digits = (t || "").replace(/\D/g, "");
+    if (digits.length === 0) return null;
+    let h: number, m: number;
+    if (digits.length <= 2) { h = parseInt(digits, 10); m = 0; }
+    else if (digits.length === 3) { h = parseInt(digits.slice(0, 1), 10); m = parseInt(digits.slice(1), 10); }
+    else { h = parseInt(digits.slice(0, 2), 10); m = parseInt(digits.slice(2, 4), 10); }
+    if (!Number.isFinite(h) || !Number.isFinite(m) || h < 0 || h > 23 || m < 0 || m > 59) return null;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  };
+
   const addRange = async () => {
     if (!date) { toast.error("Изберете дата"); return; }
     const stepMin = Number(step);
     if (!Number.isFinite(stepMin) || stepMin <= 0) { toast.error("Невалидна стъпка"); return; }
-    const generated = generateTimeSlots(rangeStart, rangeEnd, stepMin);
+    const startNorm = normalizeTimeInput(rangeStart);
+    const endNorm = normalizeTimeInput(rangeEnd);
+    if (!startNorm || !endNorm) { toast.error("Невалиден час (00:00 - 23:59)"); return; }
+    setRangeStart(startNorm);
+    setRangeEnd(endNorm);
+    const generated = generateTimeSlots(startNorm, endNorm, stepMin);
     if (generated.length === 0) { toast.error("Невалиден интервал"); return; }
     const existing = new Set((list ?? []).map((s: any) => normalizeTime(s.slot_time)));
     const toInsert = generated.filter((t) => !existing.has(t)).map((t) => ({
@@ -904,6 +920,16 @@ function SlotsTab() {
     const { error } = await supabase.from("available_slots").insert(toInsert);
     if (error) { toast.error(getAdminErrorMessage(error)); return; }
     toast.success(`Добавени ${toInsert.length} часа`);
+    load();
+  };
+
+  const removeAllForDate = async () => {
+    if (!date) { toast.error("Изберете дата"); return; }
+    if (!list || list.length === 0) { toast.info("Няма часове за изтриване"); return; }
+    if (!confirm(`Сигурни ли сте, че искате да изтриете всички ${list.length} часа за ${formatDateBG(date)}?`)) return;
+    const { error } = await supabase.from("available_slots").delete().eq("slot_date", toDateKey(date));
+    if (error) { toast.error(getAdminErrorMessage(error)); return; }
+    toast.success("Часовете са изтрити");
     load();
   };
 
