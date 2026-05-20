@@ -992,9 +992,16 @@ function SlotsTab() {
       </div>
 
       <div className="rounded-xl border bg-card p-5">
-        <h3 className="font-display text-lg text-mauve mb-3">
-          Часове за {date ? formatDateBG(date) : "—"}
-        </h3>
+        <div className="flex items-center justify-between mb-3 gap-2">
+          <h3 className="font-display text-lg text-mauve">
+            Часове за {date ? formatDateBG(date) : "—"}
+          </h3>
+          {list && list.length > 0 && (
+            <Button size="sm" variant="outline" onClick={removeAllForDate} className="text-destructive border-destructive/30 hover:bg-destructive/10">
+              <Trash2 className="mr-1 h-4 w-4" />Изтрий всички
+            </Button>
+          )}
+        </div>
         <div className="space-y-2 max-h-[500px] overflow-y-auto">
           {list?.map((s) => {
             const t = normalizeTime(s.slot_time);
