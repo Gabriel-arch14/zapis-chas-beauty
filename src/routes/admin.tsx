@@ -433,6 +433,14 @@ function CalendarTab() {
         <StatCard label="Отказани" value={monthStats.cancelled} />
       </div>
 
+      <div className="rounded-xl border bg-card p-4 max-w-xs">
+        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2 text-center">Изпуснати резервации</div>
+        <div className="font-mono text-3xl tabular-nums text-destructive text-center">
+          {missedCount === null ? "—" : String(missedCount).padStart(2, "0")}
+        </div>
+      </div>
+
+
       <div className="grid lg:grid-cols-2 gap-6">
       <div className="rounded-xl border bg-card p-5 flex justify-center">
         <Calendar
