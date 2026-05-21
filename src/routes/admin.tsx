@@ -352,6 +352,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 function CalendarTab() {
   const [selected, setSelected] = useState<Date | undefined>(new Date());
   const [rows, setRows] = useState<BookingRow[] | null>(null);
+  const [missedCount, setMissedCount] = useState<number | null>(null);
 
   const load = async () => {
     const { data } = await supabase
@@ -361,7 +362,24 @@ function CalendarTab() {
       .order("booking_time");
     setRows((data ?? []) as any);
   };
-  useEffect(() => { load(); }, []);
+  const loadMissed = async () => {
+    const now = new Date();
+    const todayKey = toDateKey(now);
+    const nowHM = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const [{ data: avail }, { data: bks }] = await Promise.all([
+      supabase.from("available_slots").select("slot_date,slot_time").lte("slot_date", todayKey),
+      supabase.from("bookings").select("booking_date,booking_time,status").lte("booking_date", todayKey).neq("status", "cancelled"),
+    ]);
+    const booked = new Set<string>();
+    (bks ?? []).forEach((b: any) => booked.add(`${b.booking_date}|${normalizeTime(b.booking_time)}`));
+    const count = ((avail ?? []) as any[]).filter((s) => {
+      const t = normalizeTime(s.slot_time);
+      const isPast = s.slot_date < todayKey || (s.slot_date === todayKey && t < nowHM);
+      return isPast && !booked.has(`${s.slot_date}|${t}`);
+    }).length;
+    setMissedCount(count);
+  };
+  useEffect(() => { load(); loadMissed(); }, []);
 
   const bookedDays = useMemo(() => {
     const set = new Set<string>();
