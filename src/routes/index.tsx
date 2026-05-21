@@ -115,18 +115,18 @@ function Index() {
         <div className="container mx-auto px-4 py-16 sm:py-24 lg:py-28">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Text */}
-            <div className="text-center lg:text-left">
+            <div className="text-center lg:pl-8 xl:pl-12 lg:max-w-md xl:max-w-lg lg:mx-auto">
               <span className="inline-flex items-center gap-2 px-3 py-1.5 border border-border bg-card text-xs uppercase tracking-[0.18em] text-muted-foreground mb-6">
                 <span className="h-1 w-1 rounded-full bg-gold" />
                 Nails studio · Габрово
               </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold text-foreground leading-[1.05] tracking-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-display font-semibold text-foreground leading-[1.05] tracking-tight">
                 Ruseva Nails<br />Studio
               </h1>
-              <p className="mt-6 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              <p className="mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed">
                 Премиум маникюр, педикюр и nail art с внимание към всеки детайл. Запишете час онлайн — бързо, лесно и удобно.
               </p>
-              <div className="mt-8 flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-3">
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Button asChild size="lg" className="h-14 text-base px-8 rounded-none w-full sm:w-auto bg-foreground text-background hover:bg-foreground/85">
                   <Link to="/specialists">
                     Запиши час сега
@@ -143,7 +143,7 @@ function Index() {
                 </Button>
               </div>
               {/* Trust badges */}
-              <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-2">
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border bg-card text-xs text-foreground">
                   <Star className="h-3.5 w-3.5 text-gold fill-gold" /> 5.0 оценка от клиенти
                 </span>
