@@ -330,7 +330,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <TabsContent value="calendar"><CalendarTab /></TabsContent>
             <TabsContent value="slots"><SlotsTab /></TabsContent>
             <TabsContent value="bookings"><BookingsTab /></TabsContent>
-            <TabsContent value="specialists"><SpecialistsTab /></TabsContent>
+            <TabsContent value="past"><PastSlotsTab /></TabsContent>
             <TabsContent value="services"><ServicesTab /></TabsContent>
             <TabsContent value="blocked"><BlockedTab /></TabsContent>
           </div>
