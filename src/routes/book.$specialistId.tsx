@@ -14,6 +14,7 @@ import { formatBGN, toDateKey, normalizeTime, formatDateBG } from "@/lib/booking
 import { Check, Clock, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { PhoneInput } from "@/components/PhoneInput";
 
 export const Route = createFileRoute("/book/$specialistId")({
   head: () => ({
