@@ -100,9 +100,25 @@ function BookPage() {
       .eq("is_available", true)
       .order("slot_time")
       .then(({ data }) => {
-        const times = (data ?? []).map((r: { slot_time: string }) => normalizeTime(r.slot_time));
+        let times = (data ?? []).map((r: { slot_time: string }) => normalizeTime(r.slot_time));
         // dedupe
-        setAvailableTimes(Array.from(new Set(times)));
+        times = Array.from(new Set(times));
+        // If selected date is today (in Europe/Sofia), filter out past times
+        const nowParts = new Intl.DateTimeFormat("en-GB", {
+          timeZone: "Europe/Sofia",
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", hour12: false,
+        }).formatToParts(new Date());
+        const get = (t: string) => nowParts.find((p) => p.type === t)?.value ?? "";
+        const todayKeyBG = `${get("year")}-${get("month")}-${get("day")}`;
+        if (key === todayKeyBG) {
+          const nowMinutes = parseInt(get("hour"), 10) * 60 + parseInt(get("minute"), 10);
+          times = times.filter((t) => {
+            const [h, m] = t.split(":").map(Number);
+            return h * 60 + m > nowMinutes;
+          });
+        }
+        setAvailableTimes(times);
         setLoadingSlots(false);
       });
   }, [date]);
