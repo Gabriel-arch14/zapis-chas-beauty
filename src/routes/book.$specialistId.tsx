@@ -59,7 +59,7 @@ function BookPage() {
   const [availableTimes, setAvailableTimes] = useState<string[] | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set());
-  const [client, setClient] = useState({ client_name: "", client_email: "", client_phone: "" });
+  const [client, setClient] = useState({ client_name: "", client_email: "", client_phone: "+359" });
   const [submitting, setSubmitting] = useState(false);
 
   // Load specialist + services
