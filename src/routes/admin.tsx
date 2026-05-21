@@ -266,9 +266,9 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [tab, setTab] = useState("calendar");
   const tabs = [
     { value: "calendar", label: "Календар" },
-    { value: "slots", label: "Часове" },
-    { value: "bookings", label: "Резервации" },
-    { value: "specialists", label: "Специалисти" },
+    { value: "slots", label: "Резервации" },
+    { value: "bookings", label: "Клиенти" },
+    { value: "past", label: "Минали часове" },
     { value: "services", label: "Услуги" },
     { value: "blocked", label: "Блокирани" },
   ];
@@ -330,7 +330,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <TabsContent value="calendar"><CalendarTab /></TabsContent>
             <TabsContent value="slots"><SlotsTab /></TabsContent>
             <TabsContent value="bookings"><BookingsTab /></TabsContent>
-            <TabsContent value="specialists"><SpecialistsTab /></TabsContent>
+            <TabsContent value="past"><PastSlotsTab /></TabsContent>
             <TabsContent value="services"><ServicesTab /></TabsContent>
             <TabsContent value="blocked"><BlockedTab /></TabsContent>
           </div>
@@ -352,6 +352,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 function CalendarTab() {
   const [selected, setSelected] = useState<Date | undefined>(new Date());
   const [rows, setRows] = useState<BookingRow[] | null>(null);
+  const [missedCount, setMissedCount] = useState<number | null>(null);
 
   const load = async () => {
     const { data } = await supabase
@@ -361,7 +362,24 @@ function CalendarTab() {
       .order("booking_time");
     setRows((data ?? []) as any);
   };
-  useEffect(() => { load(); }, []);
+  const loadMissed = async () => {
+    const now = new Date();
+    const todayKey = toDateKey(now);
+    const nowHM = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const [{ data: avail }, { data: bks }] = await Promise.all([
+      supabase.from("available_slots").select("slot_date,slot_time").lte("slot_date", todayKey),
+      supabase.from("bookings").select("booking_date,booking_time,status").lte("booking_date", todayKey).neq("status", "cancelled"),
+    ]);
+    const booked = new Set<string>();
+    (bks ?? []).forEach((b: any) => booked.add(`${b.booking_date}|${normalizeTime(b.booking_time)}`));
+    const count = ((avail ?? []) as any[]).filter((s) => {
+      const t = normalizeTime(s.slot_time);
+      const isPast = s.slot_date < todayKey || (s.slot_date === todayKey && t < nowHM);
+      return isPast && !booked.has(`${s.slot_date}|${t}`);
+    }).length;
+    setMissedCount(count);
+  };
+  useEffect(() => { load(); loadMissed(); }, []);
 
   const bookedDays = useMemo(() => {
     const set = new Set<string>();
@@ -414,6 +432,14 @@ function CalendarTab() {
         <StatCard label="Завършени" value={monthStats.completed} />
         <StatCard label="Отказани" value={monthStats.cancelled} />
       </div>
+
+      <div className="rounded-xl border bg-card p-4 max-w-xs">
+        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2 text-center">Изпуснати резервации</div>
+        <div className="font-mono text-3xl tabular-nums text-destructive text-center">
+          {missedCount === null ? "—" : String(missedCount).padStart(2, "0")}
+        </div>
+      </div>
+
 
       <div className="grid lg:grid-cols-2 gap-6">
       <div className="rounded-xl border bg-card p-5 flex justify-center">
@@ -644,52 +670,76 @@ function BookingsTab() {
   );
 }
 
-function SpecialistsTab() {
-  const [list, setList] = useState<SpecialistRow[] | null>(null);
-  const [form, setForm] = useState({ name: "", specialty: "", photo_url: "", bio: "" });
+function PastSlotsTab() {
+  const [missed, setMissed] = useState<{ date: string; time: string }[] | null>(null);
 
   const load = async () => {
-    const { data } = await supabase.from("specialists").select("id,name,specialty,photo_url").order("name");
-    setList((data ?? []) as any);
+    const now = new Date();
+    const todayKey = toDateKey(now);
+    const nowHM = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
+    const [{ data: avail }, { data: bks }] = await Promise.all([
+      supabase.from("available_slots").select("slot_date,slot_time").lte("slot_date", todayKey).order("slot_date", { ascending: false }).order("slot_time"),
+      supabase.from("bookings").select("booking_date,booking_time,status").lte("booking_date", todayKey).neq("status", "cancelled"),
+    ]);
+
+    const bookedSet = new Set<string>();
+    (bks ?? []).forEach((b: any) => {
+      bookedSet.add(`${b.booking_date}|${normalizeTime(b.booking_time)}`);
+    });
+
+    const result = ((avail ?? []) as any[])
+      .map((s) => ({ date: s.slot_date as string, time: normalizeTime(s.slot_time) }))
+      .filter((s) => {
+        if (s.date < todayKey) return true;
+        if (s.date === todayKey && s.time < nowHM) return true;
+        return false;
+      })
+      .filter((s) => !bookedSet.has(`${s.date}|${s.time}`));
+
+    setMissed(result);
   };
   useEffect(() => { load(); }, []);
 
-  const add = async () => {
-    if (!form.name || !form.specialty) { toast.error("Попълнете име и специалност"); return; }
-    const { error } = await supabase.from("specialists").insert(form);
-    if (error) toast.error(getAdminErrorMessage(error));
-    else { toast.success("Добавен"); setForm({ name: "", specialty: "", photo_url: "", bio: "" }); load(); }
-  };
-
-  const remove = async (id: string) => {
-    if (!confirm("Изтриване на специалиста?")) return;
-    const { error } = await supabase.from("specialists").delete().eq("id", id);
-    if (error) toast.error(getAdminErrorMessage(error)); else { toast.success("Изтрит"); load(); }
-  };
+  const byDate = useMemo(() => {
+    const map = new Map<string, string[]>();
+    (missed ?? []).forEach((s) => {
+      const arr = map.get(s.date) ?? [];
+      arr.push(s.time);
+      map.set(s.date, arr);
+    });
+    return Array.from(map.entries()).sort(([a], [b]) => b.localeCompare(a));
+  }, [missed]);
 
   return (
-    <div className="mt-6 grid lg:grid-cols-2 gap-6">
-      <div className="rounded-xl border bg-card p-5 space-y-3">
-        <h3 className="font-display text-lg text-mauve">Добавяне на специалист</h3>
-        <Input placeholder="Име" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        <Input placeholder="Специалност" value={form.specialty} onChange={(e) => setForm({ ...form, specialty: e.target.value })} />
-        <Input placeholder="URL на снимка" value={form.photo_url} onChange={(e) => setForm({ ...form, photo_url: e.target.value })} />
-        <Input placeholder="Кратко описание" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
-        <Button onClick={add} className="w-full sm:w-auto rounded-full bg-gradient-primary hover:opacity-90"><Plus className="mr-2 h-4 w-4" />Добави</Button>
+    <div className="mt-6 space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <StatCard label="Общо изпуснати резервации" value={missed?.length ?? 0} accent="primary" />
+        <StatCard label="Дни с изпуснати часове" value={byDate.length} />
       </div>
+
       <div className="rounded-xl border bg-card p-5">
-        <h3 className="font-display text-lg text-mauve mb-3">Списък</h3>
-        <div className="space-y-2">
-          {list?.map((s) => (
-            <div key={s.id} className="flex items-center justify-between p-3 rounded-lg border bg-background">
-              <div>
-                <p className="font-medium">{s.name}</p>
-                <p className="text-xs text-muted-foreground">{s.specialty}</p>
+        <h3 className="font-display text-lg text-mauve mb-3">Минали часове без резервация</h3>
+        {missed === null && <Skeleton className="h-24 w-full" />}
+        {missed !== null && byDate.length === 0 && (
+          <p className="text-sm text-muted-foreground">Няма изпуснати часове. Всички минали часове са били резервирани.</p>
+        )}
+        <div className="space-y-4">
+          {byDate.map(([date, times]) => (
+            <div key={date} className="rounded-lg border bg-background p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium text-mauve">{formatDateBG(date)}</h4>
+                <span className="text-xs font-mono text-muted-foreground">{times.length} {times.length === 1 ? "час" : "часа"}</span>
               </div>
-              <Button size="icon" variant="ghost" onClick={() => remove(s.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+              <div className="flex flex-wrap gap-2">
+                {times.map((t) => (
+                  <span key={t} className="font-mono text-sm tabular-nums px-2 py-1 rounded-md bg-destructive/10 text-destructive">
+                    {t}
+                  </span>
+                ))}
+              </div>
             </div>
           ))}
-          {list?.length === 0 && <p className="text-sm text-muted-foreground">Няма добавени.</p>}
         </div>
       </div>
     </div>
