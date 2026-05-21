@@ -14,6 +14,7 @@ import { formatBGN, toDateKey, normalizeTime, formatDateBG } from "@/lib/booking
 import { Check, Clock, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { PhoneInput } from "@/components/PhoneInput";
 
 export const Route = createFileRoute("/book/$specialistId")({
   head: () => ({
@@ -58,7 +59,7 @@ function BookPage() {
   const [availableTimes, setAvailableTimes] = useState<string[] | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set());
-  const [client, setClient] = useState({ client_name: "", client_email: "", client_phone: "" });
+  const [client, setClient] = useState({ client_name: "", client_email: "", client_phone: "+359" });
   const [submitting, setSubmitting] = useState(false);
 
   // Load specialist + services
@@ -100,9 +101,25 @@ function BookPage() {
       .eq("is_available", true)
       .order("slot_time")
       .then(({ data }) => {
-        const times = (data ?? []).map((r: { slot_time: string }) => normalizeTime(r.slot_time));
+        let times = (data ?? []).map((r: { slot_time: string }) => normalizeTime(r.slot_time));
         // dedupe
-        setAvailableTimes(Array.from(new Set(times)));
+        times = Array.from(new Set(times));
+        // If selected date is today (in Europe/Sofia), filter out past times
+        const nowParts = new Intl.DateTimeFormat("en-GB", {
+          timeZone: "Europe/Sofia",
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", hour12: false,
+        }).formatToParts(new Date());
+        const get = (t: string) => nowParts.find((p) => p.type === t)?.value ?? "";
+        const todayKeyBG = `${get("year")}-${get("month")}-${get("day")}`;
+        if (key === todayKeyBG) {
+          const nowMinutes = parseInt(get("hour"), 10) * 60 + parseInt(get("minute"), 10);
+          times = times.filter((t) => {
+            const [h, m] = t.split(":").map(Number);
+            return h * 60 + m > nowMinutes;
+          });
+        }
+        setAvailableTimes(times);
         setLoadingSlots(false);
       });
   }, [date]);
@@ -319,7 +336,7 @@ function BookPage() {
                 </div>
                 <div>
                   <Label htmlFor="phone">Телефон</Label>
-                  <Input id="phone" type="tel" value={client.client_phone} onChange={(e) => setClient({ ...client, client_phone: e.target.value })} className="mt-1.5" placeholder="+359 88 123 4567" />
+                  <PhoneInput id="phone" value={client.client_phone} onChange={(v) => setClient({ ...client, client_phone: v })} />
                 </div>
 
                 <div className="rounded-xl bg-secondary/60 p-4 mt-6 text-sm space-y-1">
