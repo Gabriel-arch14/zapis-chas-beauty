@@ -336,7 +336,7 @@ function BookPage() {
                 </div>
                 <div>
                   <Label htmlFor="phone">Телефон</Label>
-                  <Input id="phone" type="tel" value={client.client_phone} onChange={(e) => setClient({ ...client, client_phone: e.target.value })} className="mt-1.5" placeholder="+359 88 123 4567" />
+                  <PhoneInput id="phone" value={client.client_phone} onChange={(v) => setClient({ ...client, client_phone: v })} />
                 </div>
 
                 <div className="rounded-xl bg-secondary/60 p-4 mt-6 text-sm space-y-1">
