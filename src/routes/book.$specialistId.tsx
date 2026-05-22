@@ -42,7 +42,7 @@ interface Service {
 
 const clientSchema = z.object({
   client_name: z.string().trim().min(2, "Името е задължително").max(100),
-  client_email: z.string().trim().email("Невалиден имейл").max(255),
+  client_email: z.union([z.literal(""), z.string().trim().email("Невалиден имейл").max(255)]).optional(),
   client_phone: z.string().trim().min(6, "Невалиден телефон").max(30),
 });
 
@@ -144,7 +144,9 @@ function BookPage() {
         service_id: serviceId,
         booking_date: toDateKey(date),
         booking_time: time,
-        ...parsed.data,
+        client_name: parsed.data.client_name,
+        client_phone: parsed.data.client_phone,
+        client_email: parsed.data.client_email ?? "",
         status: "confirmed",
       })
       .select("id,cancel_token")
@@ -166,7 +168,7 @@ function BookPage() {
         booking_id: inserted.id,
         cancel_url: cancelUrl,
         client_name: parsed.data.client_name,
-        client_email: parsed.data.client_email,
+        client_email: parsed.data.client_email ?? "",
         client_phone: parsed.data.client_phone,
         specialist_name: specialist?.name ?? "",
         service_name: selectedService?.name ?? "",
@@ -331,7 +333,7 @@ function BookPage() {
                   <Input id="name" value={client.client_name} onChange={(e) => setClient({ ...client, client_name: e.target.value })} className="mt-1.5" placeholder="Иван Иванов" />
                 </div>
                 <div>
-                  <Label htmlFor="email">Имейл</Label>
+                  <Label htmlFor="email">Имейл (по желание)</Label>
                   <Input id="email" type="email" value={client.client_email} onChange={(e) => setClient({ ...client, client_email: e.target.value })} className="mt-1.5" placeholder="ivan@example.com" />
                 </div>
                 <div>
