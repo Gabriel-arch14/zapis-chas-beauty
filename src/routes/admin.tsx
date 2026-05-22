@@ -273,18 +273,18 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     { value: "blocked", label: "Блокирани" },
   ];
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
       {/* Admin top bar */}
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-900/95 backdrop-blur">
         <div className="container mx-auto px-3 sm:px-4 h-12 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_theme(colors.emerald.400)]" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-500">db</span>
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-800 truncate">/ ruseva_nails / admin</span>
+            <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_theme(colors.emerald.400)]" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400">db</span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-200 truncate">/ ruseva_nails / admin</span>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/" className="font-mono text-[11px] uppercase tracking-wider text-slate-500 hover:text-slate-900 hidden sm:inline">← site</Link>
-            <Button variant="ghost" size="sm" onClick={onLogout} className="h-8 rounded-md text-slate-700 hover:text-slate-900 hover:bg-slate-100">
+            <Link to="/" className="font-mono text-[11px] uppercase tracking-wider text-slate-400 hover:text-slate-100 hidden sm:inline">← site</Link>
+            <Button variant="ghost" size="sm" onClick={onLogout} className="h-8 rounded-md text-slate-300 hover:text-white hover:bg-slate-800">
               <LogOut className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline font-mono text-xs uppercase tracking-wider">logout</span>
             </Button>
@@ -296,37 +296,37 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         className="flex-1 container mx-auto px-3 sm:px-4 py-5 sm:py-6"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(15,23,42,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.04) 1px, transparent 1px)",
+            "linear-gradient(rgba(148,163,184,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.06) 1px, transparent 1px)",
           backgroundSize: "32px 32px",
         }}
       >
         <div className="mb-5">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">admin / dashboard</p>
-          <h1 className="font-display text-2xl sm:text-3xl text-slate-900 mt-1">Админ панел</h1>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400">admin / dashboard</p>
+          <h1 className="font-display text-2xl sm:text-3xl text-slate-100 mt-1">Админ панел</h1>
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
           {/* Mobile: dropdown selector */}
           <div className="sm:hidden mb-4">
             <Select value={tab} onValueChange={setTab}>
-              <SelectTrigger className="w-full h-11 bg-white border-slate-300 text-slate-900 font-mono text-sm uppercase tracking-wider"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full h-11 bg-slate-900 border-slate-700 text-slate-100 font-mono text-sm uppercase tracking-wider"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {tabs.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
-          <TabsList className="hidden sm:flex w-full h-auto p-1 bg-white border border-slate-200 rounded-md shadow-sm">
+          <TabsList className="hidden sm:flex w-full h-auto p-1 bg-slate-900 border border-slate-800 rounded-md shadow-sm">
             {tabs.map((t) => (
               <TabsTrigger
                 key={t.value}
                 value={t.value}
-                className="flex-1 min-w-fit font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500 data-[state=active]:bg-slate-900 data-[state=active]:text-white rounded-sm"
+                className="flex-1 min-w-fit font-mono text-[11px] uppercase tracking-[0.14em] text-slate-400 data-[state=active]:bg-slate-100 data-[state=active]:text-slate-900 rounded-sm"
               >
                 {t.label}
               </TabsTrigger>
             ))}
           </TabsList>
-          <div className="[&_.bg-card]:bg-white [&_.bg-card]:border-slate-200 [&_.bg-background]:bg-slate-50 [&_.text-mauve]:text-slate-900 [&_.bg-secondary]:bg-slate-100 [&_table_thead]:bg-slate-100 [&_table_thead]:text-slate-700 [&_table_tbody_tr:nth-child(even)]:bg-slate-50/70">
+          <div className="[&_.bg-card]:bg-slate-900 [&_.bg-card]:border-slate-800 [&_.bg-card]:text-slate-100 [&_.bg-background]:bg-slate-950 [&_.text-mauve]:text-slate-100 [&_.text-muted-foreground]:text-slate-400 [&_.bg-secondary]:bg-slate-800 [&_.bg-secondary]:text-slate-100 [&_.border-border\/50]:border-slate-800 [&_.border-border]:border-slate-800 [&_table_thead]:bg-slate-800 [&_table_thead]:text-slate-200 [&_table_tbody_tr]:border-slate-800 [&_table_tbody_tr:nth-child(even)]:bg-slate-900/60 [&_input]:bg-slate-900 [&_input]:border-slate-700 [&_input]:text-slate-100 [&_textarea]:bg-slate-900 [&_textarea]:border-slate-700 [&_textarea]:text-slate-100">
             <TabsContent value="calendar"><CalendarTab /></TabsContent>
             <TabsContent value="slots"><SlotsTab /></TabsContent>
             <TabsContent value="bookings"><BookingsTab /></TabsContent>
@@ -338,11 +338,12 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       </main>
 
       {/* Status footer bar */}
-      <footer className="border-t border-slate-200 bg-white py-2">
-        <div className="container mx-auto px-3 sm:px-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-slate-500">
+      <footer className="border-t border-slate-800 bg-slate-900 py-2">
+        <div className="container mx-auto px-3 sm:px-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-slate-400">
           <span>connection: live</span>
           <span className="hidden sm:inline">ruseva_nails @ supabase</span>
           <span>v1.0</span>
+
         </div>
       </footer>
     </div>
