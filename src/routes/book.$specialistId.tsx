@@ -144,7 +144,9 @@ function BookPage() {
         service_id: serviceId,
         booking_date: toDateKey(date),
         booking_time: time,
-        ...parsed.data,
+        client_name: parsed.data.client_name,
+        client_phone: parsed.data.client_phone,
+        client_email: parsed.data.client_email ?? "",
         status: "confirmed",
       })
       .select("id,cancel_token")
