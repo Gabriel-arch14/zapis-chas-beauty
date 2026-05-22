@@ -42,7 +42,7 @@ interface Service {
 
 const clientSchema = z.object({
   client_name: z.string().trim().min(2, "Името е задължително").max(100),
-  client_email: z.string().trim().email("Невалиден имейл").max(255),
+  client_email: z.union([z.literal(""), z.string().trim().email("Невалиден имейл").max(255)]).optional(),
   client_phone: z.string().trim().min(6, "Невалиден телефон").max(30),
 });
 
