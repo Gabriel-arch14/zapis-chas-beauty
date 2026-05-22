@@ -333,7 +333,7 @@ function BookPage() {
                   <Input id="name" value={client.client_name} onChange={(e) => setClient({ ...client, client_name: e.target.value })} className="mt-1.5" placeholder="Иван Иванов" />
                 </div>
                 <div>
-                  <Label htmlFor="email">Имейл</Label>
+                  <Label htmlFor="email">Имейл (по желание)</Label>
                   <Input id="email" type="email" value={client.client_email} onChange={(e) => setClient({ ...client, client_email: e.target.value })} className="mt-1.5" placeholder="ivan@example.com" />
                 </div>
                 <div>
