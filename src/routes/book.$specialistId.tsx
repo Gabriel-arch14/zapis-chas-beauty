@@ -153,6 +153,7 @@ function BookPage() {
       return;
     }
     setSubmitting(true);
+    const emailValue = parsed.data.client_email ?? "";
     const { data: inserted, error } = await supabase
       .from("bookings")
       .insert({
@@ -160,7 +161,9 @@ function BookPage() {
         service_id: serviceId,
         booking_date: toDateKey(date),
         booking_time: time,
-        ...parsed.data,
+        client_name: parsed.data.client_name,
+        client_phone: parsed.data.client_phone,
+        client_email: emailValue,
         status: "confirmed",
       })
       .select("id,cancel_token")
