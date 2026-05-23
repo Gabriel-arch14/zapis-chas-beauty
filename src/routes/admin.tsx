@@ -12,7 +12,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, LogOut, Plus, Trash2, LayoutDashboard, CalendarDays, CalendarPlus, ListChecks, History, Scissors, Ban, Menu, TrendingUp } from "lucide-react";
+import { CalendarIcon, LogOut, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatBGN, formatDateBG, normalizeTime, toDateKey, generateTimeSlots } from "@/lib/booking";
 
@@ -262,205 +262,90 @@ interface BookingRow {
 interface SpecialistRow { id: string; name: string; specialty: string; photo_url: string | null; }
 interface ServiceRow { id: string; specialist_id: string; name: string; duration_minutes: number; price: number; }
 
-const ADMIN_THEME: React.CSSProperties = {
-  ["--ad-sidebar" as any]: "#1C1712",
-  ["--ad-sidebar-active" as any]: "#2C2416",
-  ["--ad-gold" as any]: "#C9A84C",
-  ["--ad-gold-soft" as any]: "#E8D5A3",
-  ["--ad-sidebar-muted" as any]: "#8A7A5A",
-  ["--ad-section-label" as any]: "#5A4E38",
-  ["--ad-bg" as any]: "#FAF7F2",
-  ["--ad-card" as any]: "#FFFFFF",
-  ["--ad-card-border" as any]: "#E8DECA",
-  ["--ad-text" as any]: "#1C1712",
-  ["--ad-muted" as any]: "#8A7A5A",
-};
-
-type AdminNavGroup = "main" | "schedule" | "catalog";
-type AdminNavItem = { value: string; label: string; icon: typeof LayoutDashboard; group: AdminNavGroup };
-
-const ADMIN_NAV: AdminNavItem[] = [
-  { value: "dashboard", label: "Табло", icon: LayoutDashboard, group: "main" },
-  { value: "calendar", label: "Календар", icon: CalendarDays, group: "main" },
-  { value: "slots", label: "Нови записи", icon: CalendarPlus, group: "schedule" },
-  { value: "bookings", label: "Резервации", icon: ListChecks, group: "schedule" },
-  { value: "past", label: "Минали часове", icon: History, group: "schedule" },
-  { value: "services", label: "Услуги", icon: Scissors, group: "catalog" },
-  { value: "blocked", label: "Блокирани", icon: Ban, group: "catalog" },
-];
-
-const ADMIN_GROUP_LABEL: Record<AdminNavGroup, string> = {
-  main: "Общ преглед",
-  schedule: "График",
-  catalog: "Каталог",
-};
-
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
-  const [tab, setTab] = useState("dashboard");
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  const greeting = useMemo(() => {
-    const h = new Date().getHours();
-    if (h < 12) return "Добро утро";
-    if (h < 18) return "Добър ден";
-    return "Добра вечер";
-  }, []);
-  const todayLabel = useMemo(
-    () => new Date().toLocaleDateString("bg-BG", { weekday: "long", day: "numeric", month: "long" }),
-    []
-  );
-
-  const currentLabel = ADMIN_NAV.find((n) => n.value === tab)?.label ?? "Табло";
-
-  const grouped = useMemo(() => {
-    const map: Record<AdminNavGroup, AdminNavItem[]> = { main: [], schedule: [], catalog: [] };
-    ADMIN_NAV.forEach((n) => map[n.group].push(n));
-    return map;
-  }, []);
-
-  const renderNav = (onPick?: () => void) => (
-    <nav className="flex flex-col gap-5">
-      {(Object.keys(grouped) as AdminNavGroup[]).map((g) => (
-        <div key={g}>
-          <div
-            className="px-4 mb-2 text-[9px] uppercase font-medium"
-            style={{ color: "var(--ad-section-label)", letterSpacing: "0.18em" }}
-          >
-            {ADMIN_GROUP_LABEL[g]}
-          </div>
-          <ul className="flex flex-col">
-            {grouped[g].map((item) => {
-              const Icon = item.icon;
-              const active = tab === item.value;
-              return (
-                <li key={item.value}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTab(item.value);
-                      onPick?.();
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
-                    style={{
-                      color: active ? "var(--ad-gold-soft)" : "var(--ad-sidebar-muted)",
-                      background: active ? "var(--ad-sidebar-active)" : "transparent",
-                      borderLeft: `3px solid ${active ? "var(--ad-gold)" : "transparent"}`,
-                      fontWeight: active ? 500 : 400,
-                    }}
-                  >
-                    <Icon className="h-4 w-4" style={{ color: active ? "var(--ad-gold)" : "var(--ad-sidebar-muted)" }} />
-                    <span>{item.label}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
-      <div className="mt-2 px-4">
-        <button
-          type="button"
-          onClick={onLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors"
-          style={{ color: "var(--ad-sidebar-muted)", border: "1px solid rgba(138,122,90,0.2)" }}
-        >
-          <LogOut className="h-4 w-4" />
-          <span>Изход</span>
-        </button>
-      </div>
-    </nav>
-  );
-
+  const [tab, setTab] = useState("calendar");
+  const tabs = [
+    { value: "calendar", label: "Календар" },
+    { value: "slots", label: "Нови резервации" },
+    { value: "bookings", label: "Резервации" },
+    { value: "past", label: "Минали часове" },
+    { value: "services", label: "Услуги" },
+    { value: "blocked", label: "Блокирани" },
+  ];
   return (
-    <div className="min-h-screen flex" style={{ ...ADMIN_THEME, background: "var(--ad-bg)", color: "var(--ad-text)" }}>
-      {/* Desktop sidebar */}
-      <aside
-        className="hidden md:flex flex-col py-6 shrink-0"
-        style={{ width: 200, background: "var(--ad-sidebar)", color: "var(--ad-sidebar-muted)" }}
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+      {/* Admin top bar */}
+      <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-900/95 backdrop-blur">
+        <div className="container mx-auto px-3 sm:px-4 h-12 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_theme(colors.emerald.400)]" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400">db</span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-200 truncate">/ ruseva_nails / admin</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link to="/" className="font-mono text-[11px] uppercase tracking-wider text-slate-400 hover:text-slate-100 hidden sm:inline">← site</Link>
+            <Button variant="ghost" size="sm" onClick={onLogout} className="h-8 rounded-md text-slate-300 hover:text-white hover:bg-slate-800">
+              <LogOut className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline font-mono text-xs uppercase tracking-wider">logout</span>
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main
+        className="flex-1 container mx-auto px-3 sm:px-4 py-5 sm:py-6"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(148,163,184,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.06) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+        }}
       >
-        <div className="px-4 mb-6">
-          <div className="text-[10px] uppercase" style={{ color: "var(--ad-section-label)", letterSpacing: "0.22em" }}>
-            Ruseva Nails
+        <div className="mb-5">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400">admin / dashboard</p>
+          <h1 className="font-display text-2xl sm:text-3xl text-slate-100 mt-1">Админ панел</h1>
+        </div>
+
+        <Tabs value={tab} onValueChange={setTab}>
+          {/* Mobile: dropdown selector */}
+          <div className="sm:hidden mb-4">
+            <Select value={tab} onValueChange={setTab}>
+              <SelectTrigger className="w-full h-11 bg-slate-900 border-slate-700 text-slate-100 font-mono text-sm uppercase tracking-wider"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {tabs.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="mt-1 text-base font-medium" style={{ color: "var(--ad-gold-soft)" }}>
-            Админ
+          <TabsList className="hidden sm:flex w-full h-auto p-1 bg-slate-900 border border-slate-800 rounded-md shadow-sm">
+            {tabs.map((t) => (
+              <TabsTrigger
+                key={t.value}
+                value={t.value}
+                className="flex-1 min-w-fit font-mono text-[11px] uppercase tracking-[0.14em] text-slate-400 data-[state=active]:bg-slate-100 data-[state=active]:text-slate-900 rounded-sm"
+              >
+                {t.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <div className="[&_.bg-card]:bg-slate-900 [&_.bg-card]:border-slate-800 [&_.bg-card]:text-slate-100 [&_.bg-background]:bg-slate-950 [&_.text-mauve]:text-slate-100 [&_.text-muted-foreground]:text-slate-400 [&_.bg-secondary]:bg-slate-800 [&_.bg-secondary]:text-slate-100 [&_.border-border\/50]:border-slate-800 [&_.border-border]:border-slate-800 [&_table_thead]:bg-slate-800 [&_table_thead]:text-slate-200 [&_table_tbody_tr]:border-slate-800 [&_table_tbody_tr:nth-child(even)]:bg-slate-900/60 [&_input]:bg-slate-900 [&_input]:border-slate-700 [&_input]:text-slate-100 [&_textarea]:bg-slate-900 [&_textarea]:border-slate-700 [&_textarea]:text-slate-100">
+            <TabsContent value="calendar"><CalendarTab /></TabsContent>
+            <TabsContent value="slots"><SlotsTab /></TabsContent>
+            <TabsContent value="bookings"><BookingsTab /></TabsContent>
+            <TabsContent value="past"><PastSlotsTab /></TabsContent>
+            <TabsContent value="services"><ServicesTab /></TabsContent>
+            <TabsContent value="blocked"><BlockedTab /></TabsContent>
           </div>
-          <div className="mt-2 h-px w-9" style={{ background: "var(--ad-gold)" }} />
-        </div>
-        {renderNav()}
-      </aside>
-
-      {/* Mobile drawer */}
-      {mobileOpen && (
-        <div className="md:hidden fixed inset-0 z-40 flex">
-          <div className="flex flex-col py-6 w-[220px]" style={{ background: "var(--ad-sidebar)" }}>
-            <div className="px-4 mb-6">
-              <div className="text-[10px] uppercase" style={{ color: "var(--ad-section-label)", letterSpacing: "0.22em" }}>
-                Ruseva Nails
-              </div>
-              <div className="mt-1 text-base font-medium" style={{ color: "var(--ad-gold-soft)" }}>
-                Админ
-              </div>
-              <div className="mt-2 h-px w-9" style={{ background: "var(--ad-gold)" }} />
-            </div>
-            {renderNav(() => setMobileOpen(false))}
-          </div>
-          <button
-            type="button"
-            aria-label="Затвори"
-            onClick={() => setMobileOpen(false)}
-            className="flex-1 bg-black/40"
-          />
-        </div>
-      )}
-
-      <main className="flex-1 min-w-0" style={{ ...ADMIN_THEME }}>
-        {/* Mobile top bar */}
-        <div
-          className="md:hidden flex items-center justify-between px-4 py-3"
-          style={{ background: "var(--ad-sidebar)" }}
-        >
-          <button
-            type="button"
-            onClick={() => setMobileOpen(true)}
-            className="inline-flex items-center gap-2 text-sm"
-            style={{ color: "var(--ad-gold-soft)" }}
-          >
-            <Menu className="h-5 w-5" />
-            <span>Меню</span>
-          </button>
-          <span className="text-xs uppercase" style={{ letterSpacing: "0.18em", color: "var(--ad-sidebar-muted)" }}>
-            {currentLabel}
-          </span>
-        </div>
-
-        <div className="px-4 sm:px-8 py-6 sm:py-8 max-w-6xl">
-          <header className="mb-6">
-            <h1
-              className="text-2xl sm:text-3xl"
-              style={{ color: "var(--ad-text)", fontFamily: "var(--font-sans)", fontWeight: 500, letterSpacing: "-0.01em" }}
-            >
-              {greeting}
-            </h1>
-            <div className="mt-2 h-[2px] w-9" style={{ background: "var(--ad-gold)" }} />
-            <p className="mt-3 text-sm" style={{ color: "var(--ad-muted)" }}>
-              {todayLabel} · {currentLabel}
-            </p>
-          </header>
-
-          <Tabs value={tab} onValueChange={setTab}>
-            <div className="[&_.bg-card]:bg-white [&_.bg-card]:text-[var(--ad-text)] [&_.bg-card]:border-[var(--ad-card-border)] [&_.bg-background]:bg-[var(--ad-bg)] [&_.text-mauve]:text-[var(--ad-text)] [&_.text-muted-foreground]:text-[var(--ad-muted)] [&_.bg-gradient-primary]:bg-[var(--ad-gold)] [&_.bg-gradient-primary]:text-white [&_.bg-secondary]:bg-[#F4EDDF] [&_.bg-secondary]:text-[var(--ad-text)] [&_table_thead]:bg-[#F4EDDF] [&_table_thead]:text-[var(--ad-text)]">
-              <TabsContent value="dashboard"><CalendarTab /></TabsContent>
-              <TabsContent value="calendar"><CalendarTab /></TabsContent>
-              <TabsContent value="slots"><SlotsTab /></TabsContent>
-              <TabsContent value="bookings"><BookingsTab /></TabsContent>
-              <TabsContent value="past"><PastSlotsTab /></TabsContent>
-              <TabsContent value="services"><ServicesTab /></TabsContent>
-              <TabsContent value="blocked"><BlockedTab /></TabsContent>
-            </div>
-          </Tabs>
-        </div>
+        </Tabs>
       </main>
+
+      {/* Status footer bar */}
+      <footer className="border-t border-slate-800 bg-slate-900 py-2">
+        <div className="container mx-auto px-3 sm:px-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-slate-400">
+          <span>connection: live</span>
+          <span className="hidden sm:inline">ruseva_nails @ supabase</span>
+          <span>v1.0</span>
+
+        </div>
+      </footer>
     </div>
   );
 }
@@ -549,97 +434,61 @@ function CalendarTab() {
         <StatCard label="Отказани" value={monthStats.cancelled} />
       </div>
 
-      <div
-        className="rounded-[12px] p-5 sm:p-6 flex items-center justify-between gap-6"
-        style={{ background: "linear-gradient(120deg, #1C1712, #2C2416)" }}
-      >
-        <div
-          className="text-5xl sm:text-6xl tabular-nums font-medium leading-none"
-          style={{ color: "#C9A84C", fontVariantNumeric: "tabular-nums" }}
-        >
+      <div className="rounded-xl border bg-card p-4 max-w-xs">
+        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2 text-center">Изпуснати резервации</div>
+        <div className="font-mono text-3xl tabular-nums text-destructive text-center">
           {missedCount === null ? "—" : String(missedCount).padStart(2, "0")}
-        </div>
-        <div className="text-right">
-          <div className="text-base sm:text-lg font-medium" style={{ color: "#E8D5A3" }}>
-            Изпуснати резервации
-          </div>
-          <div className="text-xs mt-1" style={{ color: "#8A7A5A" }}>
-            Минали часове без направена резервация
-          </div>
         </div>
       </div>
 
+
       <div className="grid lg:grid-cols-2 gap-6">
-      <div
-        className="rounded-[12px] border p-5 flex justify-center bg-white admin-calendar"
-        style={{ borderColor: "var(--ad-card-border)" }}
-      >
-        <style>{`
-          .admin-calendar .rdp-head_cell { color: #C9A84C; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; font-weight: 500; }
-          .admin-calendar .rdp-caption_label { text-transform: uppercase; letter-spacing: 0.14em; font-size: 13px; color: #1C1712; font-weight: 500; }
-          .admin-calendar .rdp-day_today:not(.rdp-day_outside) { background: #C9A84C !important; color: #ffffff !important; border-radius: 6px; }
-          .admin-calendar .day-has-booking { background: #FAF7F2; color: #1C1712; border-radius: 6px; }
-        `}</style>
+      <div className="rounded-xl border bg-card p-5 flex justify-center">
         <Calendar
           mode="single"
           selected={selected}
           onSelect={setSelected}
           modifiers={{ booked: bookedDays }}
-          modifiersClassNames={{ booked: "day-has-booking" }}
+          modifiersClassNames={{
+            booked: "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1.5 after:w-1.5 after:rounded-full after:bg-primary",
+          }}
           className="p-3 pointer-events-auto"
         />
       </div>
-      <div
-        className="rounded-[12px] border p-5 bg-white"
-        style={{ borderColor: "var(--ad-card-border)" }}
-      >
-        <h3 className="text-base mb-4 font-medium" style={{ color: "var(--ad-text)" }}>
+      <div className="rounded-xl border bg-card p-5">
+        <h3 className="font-display text-lg text-mauve mb-3">
           {selected ? formatDateBG(selected) : "Изберете дата"}
         </h3>
         {rows === null && <Skeleton className="h-24 w-full" />}
         {rows !== null && dayBookings.length === 0 && (
-          <p className="text-sm" style={{ color: "var(--ad-muted)" }}>Няма резервации за този ден.</p>
+          <p className="text-sm text-muted-foreground">Няма резервации за този ден.</p>
         )}
         <div className="space-y-2">
           {dayBookings.map((b) => (
-            <div
-              key={b.id}
-              className={cn(
-                "flex items-start justify-between gap-3 p-3 rounded-[8px] border relative pl-4",
-                b.status === "cancelled" && "opacity-60",
-              )}
-              style={{ background: "#FAF7F2", borderColor: "var(--ad-card-border)" }}
-            >
-              <span
-                aria-hidden
-                className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r"
-                style={{ background: "#C9A84C" }}
-              />
+            <div key={b.id} className="flex items-start justify-between gap-3 p-3 rounded-lg border bg-background">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium tabular-nums" style={{ color: "#C9A84C" }}>{normalizeTime(b.booking_time)}</span>
-                  <span
-                    className={cn(
-                      "text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full border",
-                      b.status === "cancelled" && "line-through",
-                    )}
-                    style={{ background: "#FAF7F2", borderColor: "#C9A84C", color: "#1C1712" }}
-                  >
+                  <span className="font-medium text-mauve">{normalizeTime(b.booking_time)}</span>
+                  <span className={cn(
+                    "text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full",
+                    b.status === "confirmed" && "bg-primary/10 text-primary",
+                    b.status === "completed" && "bg-emerald-500/10 text-emerald-600",
+                    b.status === "cancelled" && "bg-destructive/10 text-destructive line-through",
+                  )}>
                     {b.status === "confirmed" ? "потвърдена" : b.status === "completed" ? "завършена" : "отказана"}
                   </span>
                 </div>
-                <div className="text-sm mt-1" style={{ color: "var(--ad-text)" }}>{b.client_name}</div>
-                <div className="text-xs truncate" style={{ color: "var(--ad-muted)" }}>
+                <div className="text-sm">{b.client_name}</div>
+                <div className="text-xs text-muted-foreground truncate">
                   {b.specialists?.name} • {b.services?.name}
                 </div>
-                <div className="text-xs truncate" style={{ color: "var(--ad-muted)" }}>{b.client_phone} • {b.client_email}</div>
+                <div className="text-xs text-muted-foreground truncate">{b.client_phone} • {b.client_email}</div>
               </div>
             </div>
           ))}
         </div>
       </div>
       </div>
-
 
       <div className="rounded-xl border bg-card p-5">
         <h3 className="font-display text-lg text-mauve mb-3">Месечен отчет — {monthLabel}</h3>
@@ -674,32 +523,15 @@ function CalendarTab() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number; accent?: "primary" }) {
+function StatCard({ label, value, accent }: { label: string; value: number; accent?: "primary" }) {
   return (
-    <div
-      className="relative overflow-hidden bg-white p-4 sm:p-5 border"
-      style={{
-        borderColor: "#E8DECA",
-        borderRadius: 10,
-        boxShadow: "0 1px 2px rgba(28,23,18,0.04)",
-      }}
-    >
-      <span aria-hidden className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "#C9A84C" }} />
-      <div className="flex items-start justify-between gap-3">
-        <div
-          className="text-[9px] uppercase font-medium truncate"
-          style={{ color: "#8A7A5A", letterSpacing: "0.18em" }}
-        >
-          {label}
-        </div>
-        <TrendingUp className="h-4 w-4 shrink-0" style={{ color: "#E8DECA" }} />
-      </div>
-      <div
-        className="mt-3 text-3xl sm:text-4xl tabular-nums leading-none"
-        style={{ color: "#1C1712", fontWeight: 500 }}
-      >
-        {value.toString().padStart(2, "0")}
-      </div>
+    <div className={cn(
+      "rounded-md border border-slate-200 bg-white p-4 relative overflow-hidden shadow-sm",
+      accent === "primary" && "border-emerald-500/50",
+    )}>
+      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500 truncate">{label}</div>
+      <div className="font-mono text-3xl tabular-nums text-slate-900 mt-2">{value.toString().padStart(2, "0")}</div>
+      {accent === "primary" && <div className="absolute top-0 left-0 h-full w-0.5 bg-emerald-500" />}
     </div>
   );
 }
