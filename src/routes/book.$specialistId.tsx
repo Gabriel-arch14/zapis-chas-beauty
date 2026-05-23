@@ -200,8 +200,10 @@ function BookPage() {
       time,
       name: parsed.data.client_name,
       duration: String(selectedService?.duration_minutes ?? 30),
+      token: inserted.cancel_token,
     });
     navigate({ to: "/confirmation", search: Object.fromEntries(params) as any });
+
   };
 
   if (!specialist) {
