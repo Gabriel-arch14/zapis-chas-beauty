@@ -549,61 +549,97 @@ function CalendarTab() {
         <StatCard label="Отказани" value={monthStats.cancelled} />
       </div>
 
-      <div className="rounded-xl border bg-card p-4 max-w-xs">
-        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500 mb-2 text-center">Изпуснати резервации</div>
-        <div className="font-mono text-3xl tabular-nums text-destructive text-center">
+      <div
+        className="rounded-[12px] p-5 sm:p-6 flex items-center justify-between gap-6"
+        style={{ background: "linear-gradient(120deg, #1C1712, #2C2416)" }}
+      >
+        <div
+          className="text-5xl sm:text-6xl tabular-nums font-medium leading-none"
+          style={{ color: "#C9A84C", fontVariantNumeric: "tabular-nums" }}
+        >
           {missedCount === null ? "—" : String(missedCount).padStart(2, "0")}
+        </div>
+        <div className="text-right">
+          <div className="text-base sm:text-lg font-medium" style={{ color: "#E8D5A3" }}>
+            Изпуснати резервации
+          </div>
+          <div className="text-xs mt-1" style={{ color: "#8A7A5A" }}>
+            Минали часове без направена резервация
+          </div>
         </div>
       </div>
 
-
       <div className="grid lg:grid-cols-2 gap-6">
-      <div className="rounded-xl border bg-card p-5 flex justify-center">
+      <div
+        className="rounded-[12px] border p-5 flex justify-center bg-white admin-calendar"
+        style={{ borderColor: "var(--ad-card-border)" }}
+      >
+        <style>{`
+          .admin-calendar .rdp-head_cell { color: #C9A84C; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; font-weight: 500; }
+          .admin-calendar .rdp-caption_label { text-transform: uppercase; letter-spacing: 0.14em; font-size: 13px; color: #1C1712; font-weight: 500; }
+          .admin-calendar .rdp-day_today:not(.rdp-day_outside) { background: #C9A84C !important; color: #ffffff !important; border-radius: 6px; }
+          .admin-calendar .day-has-booking { background: #FAF7F2; color: #1C1712; border-radius: 6px; }
+        `}</style>
         <Calendar
           mode="single"
           selected={selected}
           onSelect={setSelected}
           modifiers={{ booked: bookedDays }}
-          modifiersClassNames={{
-            booked: "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1.5 after:w-1.5 after:rounded-full after:bg-primary",
-          }}
+          modifiersClassNames={{ booked: "day-has-booking" }}
           className="p-3 pointer-events-auto"
         />
       </div>
-      <div className="rounded-xl border bg-card p-5">
-        <h3 className="font-display text-lg text-mauve mb-3">
+      <div
+        className="rounded-[12px] border p-5 bg-white"
+        style={{ borderColor: "var(--ad-card-border)" }}
+      >
+        <h3 className="text-base mb-4 font-medium" style={{ color: "var(--ad-text)" }}>
           {selected ? formatDateBG(selected) : "Изберете дата"}
         </h3>
         {rows === null && <Skeleton className="h-24 w-full" />}
         {rows !== null && dayBookings.length === 0 && (
-          <p className="text-sm text-muted-foreground">Няма резервации за този ден.</p>
+          <p className="text-sm" style={{ color: "var(--ad-muted)" }}>Няма резервации за този ден.</p>
         )}
         <div className="space-y-2">
           {dayBookings.map((b) => (
-            <div key={b.id} className="flex items-start justify-between gap-3 p-3 rounded-lg border bg-background">
+            <div
+              key={b.id}
+              className={cn(
+                "flex items-start justify-between gap-3 p-3 rounded-[8px] border relative pl-4",
+                b.status === "cancelled" && "opacity-60",
+              )}
+              style={{ background: "#FAF7F2", borderColor: "var(--ad-card-border)" }}
+            >
+              <span
+                aria-hidden
+                className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r"
+                style={{ background: "#C9A84C" }}
+              />
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-mauve">{normalizeTime(b.booking_time)}</span>
-                  <span className={cn(
-                    "text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full",
-                    b.status === "confirmed" && "bg-primary/10 text-primary",
-                    b.status === "completed" && "bg-emerald-500/10 text-emerald-600",
-                    b.status === "cancelled" && "bg-destructive/10 text-destructive line-through",
-                  )}>
+                  <span className="font-medium tabular-nums" style={{ color: "#C9A84C" }}>{normalizeTime(b.booking_time)}</span>
+                  <span
+                    className={cn(
+                      "text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full border",
+                      b.status === "cancelled" && "line-through",
+                    )}
+                    style={{ background: "#FAF7F2", borderColor: "#C9A84C", color: "#1C1712" }}
+                  >
                     {b.status === "confirmed" ? "потвърдена" : b.status === "completed" ? "завършена" : "отказана"}
                   </span>
                 </div>
-                <div className="text-sm">{b.client_name}</div>
-                <div className="text-xs text-muted-foreground truncate">
+                <div className="text-sm mt-1" style={{ color: "var(--ad-text)" }}>{b.client_name}</div>
+                <div className="text-xs truncate" style={{ color: "var(--ad-muted)" }}>
                   {b.specialists?.name} • {b.services?.name}
                 </div>
-                <div className="text-xs text-muted-foreground truncate">{b.client_phone} • {b.client_email}</div>
+                <div className="text-xs truncate" style={{ color: "var(--ad-muted)" }}>{b.client_phone} • {b.client_email}</div>
               </div>
             </div>
           ))}
         </div>
       </div>
       </div>
+
 
       <div className="rounded-xl border bg-card p-5">
         <h3 className="font-display text-lg text-mauve mb-3">Месечен отчет — {monthLabel}</h3>
