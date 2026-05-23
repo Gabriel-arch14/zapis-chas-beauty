@@ -674,15 +674,32 @@ function CalendarTab() {
   );
 }
 
-function StatCard({ label, value, accent }: { label: string; value: number; accent?: "primary" }) {
+function StatCard({ label, value }: { label: string; value: number; accent?: "primary" }) {
   return (
-    <div className={cn(
-      "rounded-md border border-slate-200 bg-white p-4 relative overflow-hidden shadow-sm",
-      accent === "primary" && "border-emerald-500/50",
-    )}>
-      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500 truncate">{label}</div>
-      <div className="font-mono text-3xl tabular-nums text-slate-900 mt-2">{value.toString().padStart(2, "0")}</div>
-      {accent === "primary" && <div className="absolute top-0 left-0 h-full w-0.5 bg-emerald-500" />}
+    <div
+      className="relative overflow-hidden bg-white p-4 sm:p-5 border"
+      style={{
+        borderColor: "#E8DECA",
+        borderRadius: 10,
+        boxShadow: "0 1px 2px rgba(28,23,18,0.04)",
+      }}
+    >
+      <span aria-hidden className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "#C9A84C" }} />
+      <div className="flex items-start justify-between gap-3">
+        <div
+          className="text-[9px] uppercase font-medium truncate"
+          style={{ color: "#8A7A5A", letterSpacing: "0.18em" }}
+        >
+          {label}
+        </div>
+        <TrendingUp className="h-4 w-4 shrink-0" style={{ color: "#E8DECA" }} />
+      </div>
+      <div
+        className="mt-3 text-3xl sm:text-4xl tabular-nums leading-none"
+        style={{ color: "#1C1712", fontWeight: 500 }}
+      >
+        {value.toString().padStart(2, "0")}
+      </div>
     </div>
   );
 }
