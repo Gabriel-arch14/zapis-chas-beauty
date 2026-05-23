@@ -185,7 +185,7 @@ function BookPage() {
         booking_id: inserted.id,
         cancel_url: cancelUrl,
         client_name: parsed.data.client_name,
-        client_email: parsed.data.client_email,
+        client_email: emailValue,
         client_phone: parsed.data.client_phone,
         specialist_name: specialist?.name ?? "",
         service_name: selectedService?.name ?? "",
