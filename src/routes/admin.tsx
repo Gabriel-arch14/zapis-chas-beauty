@@ -12,7 +12,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, LogOut, Plus, Trash2 } from "lucide-react";
+import { CalendarIcon, LogOut, Plus, Trash2, LayoutDashboard, CalendarDays, CalendarPlus, ListChecks, History, Scissors, Ban, Menu, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { formatBGN, formatDateBG, normalizeTime, toDateKey, generateTimeSlots } from "@/lib/booking";
 
