@@ -14,7 +14,7 @@ import { formatBGN, toDateKey, normalizeTime, formatDateBG } from "@/lib/booking
 import { Check, Clock, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { PhoneInput } from "@/components/PhoneInput";
+import { PhoneInput, validatePhoneNumber } from "@/components/PhoneInput";
 
 export const Route = createFileRoute("/book/$specialistId")({
   head: () => ({
@@ -43,7 +43,14 @@ interface Service {
 const clientSchema = z.object({
   client_name: z.string().trim().min(2, "Името е задължително").max(100),
   client_email: z.union([z.literal(""), z.string().trim().email("Невалиден имейл").max(255)]).optional(),
-  client_phone: z.string().trim().min(6, "Невалиден телефон").max(30),
+  client_phone: z
+    .string()
+    .trim()
+    .max(30)
+    .superRefine((v, ctx) => {
+      const err = validatePhoneNumber(v);
+      if (err) ctx.addIssue({ code: z.ZodIssueCode.custom, message: err });
+    }),
 });
 
 function BookPage() {
