@@ -842,13 +842,41 @@ function BlockedTab() {
 
   const add = async () => {
     if (!specialistId || !date) { toast.error("Изберете специалист и дата"); return; }
+    const dateKey = toDateKey(date);
+    const blockedTime = time === "all" ? null : time;
+
+    // Проверка дали вече има блокиране за тази дата/специалист
+    const { data: existing, error: checkError } = await supabase
+      .from("blocked_slots")
+      .select("id, blocked_time")
+      .eq("specialist_id", specialistId)
+      .eq("blocked_date", dateKey);
+    if (checkError) { toast.error(getAdminErrorMessage(checkError)); return; }
+
+    if (existing && existing.length > 0) {
+      const hasWholeDay = existing.some((e: any) => e.blocked_time === null);
+      if (hasWholeDay) {
+        toast.error("Тази дата вече е блокирана за целия ден.");
+        return;
+      }
+      if (blockedTime === null) {
+        toast.error("Има вече блокирани часове за тази дата. Премахнете ги преди да блокирате целия ден.");
+        return;
+      }
+      if (existing.some((e: any) => normalizeTime(e.blocked_time) === normalizeTime(blockedTime))) {
+        toast.error("Този час вече е блокиран за избраната дата.");
+        return;
+      }
+    }
+
     const { error } = await supabase.from("blocked_slots").insert({
       specialist_id: specialistId,
-      blocked_date: toDateKey(date),
-      blocked_time: time === "all" ? null : time,
+      blocked_date: dateKey,
+      blocked_time: blockedTime,
     });
     if (error) toast.error(getAdminErrorMessage(error)); else { toast.success("Блокирано"); load(); }
   };
+
 
   const remove = async (id: string) => {
     const { error } = await supabase.from("blocked_slots").delete().eq("id", id);
