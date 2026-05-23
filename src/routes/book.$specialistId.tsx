@@ -43,8 +43,23 @@ interface Service {
 
 const clientSchema = z.object({
   client_name: z.string().trim().min(2, "Името е задължително").max(100),
-  client_email: z.string().trim().email("Невалиден имейл").max(255),
-  client_phone: z.string().trim().min(6, "Невалиден телефон").max(30),
+  client_email: z
+    .string()
+    .trim()
+    .max(255)
+    .optional()
+    .or(z.literal(""))
+    .refine((v) => !v || z.string().email().safeParse(v).success, {
+      message: "Невалиден имейл",
+    }),
+  client_phone: z
+    .string()
+    .trim()
+    .min(6, "Телефонът е задължителен")
+    .max(30)
+    .refine((v) => isValidPhoneNumber(v.replace(/\s+/g, "")), {
+      message: "Невалиден телефонен номер",
+    }),
 });
 
 function BookPage() {
