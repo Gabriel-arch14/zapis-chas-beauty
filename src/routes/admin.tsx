@@ -262,90 +262,205 @@ interface BookingRow {
 interface SpecialistRow { id: string; name: string; specialty: string; photo_url: string | null; }
 interface ServiceRow { id: string; specialist_id: string; name: string; duration_minutes: number; price: number; }
 
+const ADMIN_THEME: React.CSSProperties = {
+  ["--ad-sidebar" as any]: "#1C1712",
+  ["--ad-sidebar-active" as any]: "#2C2416",
+  ["--ad-gold" as any]: "#C9A84C",
+  ["--ad-gold-soft" as any]: "#E8D5A3",
+  ["--ad-sidebar-muted" as any]: "#8A7A5A",
+  ["--ad-section-label" as any]: "#5A4E38",
+  ["--ad-bg" as any]: "#FAF7F2",
+  ["--ad-card" as any]: "#FFFFFF",
+  ["--ad-card-border" as any]: "#E8DECA",
+  ["--ad-text" as any]: "#1C1712",
+  ["--ad-muted" as any]: "#8A7A5A",
+};
+
+type AdminNavGroup = "main" | "schedule" | "catalog";
+type AdminNavItem = { value: string; label: string; icon: typeof LayoutDashboard; group: AdminNavGroup };
+
+const ADMIN_NAV: AdminNavItem[] = [
+  { value: "dashboard", label: "Табло", icon: LayoutDashboard, group: "main" },
+  { value: "calendar", label: "Календар", icon: CalendarDays, group: "main" },
+  { value: "slots", label: "Нови записи", icon: CalendarPlus, group: "schedule" },
+  { value: "bookings", label: "Резервации", icon: ListChecks, group: "schedule" },
+  { value: "past", label: "Минали часове", icon: History, group: "schedule" },
+  { value: "services", label: "Услуги", icon: Scissors, group: "catalog" },
+  { value: "blocked", label: "Блокирани", icon: Ban, group: "catalog" },
+];
+
+const ADMIN_GROUP_LABEL: Record<AdminNavGroup, string> = {
+  main: "Общ преглед",
+  schedule: "График",
+  catalog: "Каталог",
+};
+
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
-  const [tab, setTab] = useState("calendar");
-  const tabs = [
-    { value: "calendar", label: "Календар" },
-    { value: "slots", label: "Нови резервации" },
-    { value: "bookings", label: "Резервации" },
-    { value: "past", label: "Минали часове" },
-    { value: "services", label: "Услуги" },
-    { value: "blocked", label: "Блокирани" },
-  ];
+  const [tab, setTab] = useState("dashboard");
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const greeting = useMemo(() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Добро утро";
+    if (h < 18) return "Добър ден";
+    return "Добра вечер";
+  }, []);
+  const todayLabel = useMemo(
+    () => new Date().toLocaleDateString("bg-BG", { weekday: "long", day: "numeric", month: "long" }),
+    []
+  );
+
+  const currentLabel = ADMIN_NAV.find((n) => n.value === tab)?.label ?? "Табло";
+
+  const grouped = useMemo(() => {
+    const map: Record<AdminNavGroup, AdminNavItem[]> = { main: [], schedule: [], catalog: [] };
+    ADMIN_NAV.forEach((n) => map[n.group].push(n));
+    return map;
+  }, []);
+
+  const renderNav = (onPick?: () => void) => (
+    <nav className="flex flex-col gap-5">
+      {(Object.keys(grouped) as AdminNavGroup[]).map((g) => (
+        <div key={g}>
+          <div
+            className="px-4 mb-2 text-[9px] uppercase font-medium"
+            style={{ color: "var(--ad-section-label)", letterSpacing: "0.18em" }}
+          >
+            {ADMIN_GROUP_LABEL[g]}
+          </div>
+          <ul className="flex flex-col">
+            {grouped[g].map((item) => {
+              const Icon = item.icon;
+              const active = tab === item.value;
+              return (
+                <li key={item.value}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTab(item.value);
+                      onPick?.();
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                    style={{
+                      color: active ? "var(--ad-gold-soft)" : "var(--ad-sidebar-muted)",
+                      background: active ? "var(--ad-sidebar-active)" : "transparent",
+                      borderLeft: `3px solid ${active ? "var(--ad-gold)" : "transparent"}`,
+                      fontWeight: active ? 500 : 400,
+                    }}
+                  >
+                    <Icon className="h-4 w-4" style={{ color: active ? "var(--ad-gold)" : "var(--ad-sidebar-muted)" }} />
+                    <span>{item.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+      <div className="mt-2 px-4">
+        <button
+          type="button"
+          onClick={onLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-colors"
+          style={{ color: "var(--ad-sidebar-muted)", border: "1px solid rgba(138,122,90,0.2)" }}
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Изход</span>
+        </button>
+      </div>
+    </nav>
+  );
+
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
-      {/* Admin top bar */}
-      <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-900/95 backdrop-blur">
-        <div className="container mx-auto px-3 sm:px-4 h-12 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_theme(colors.emerald.400)]" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400">db</span>
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-200 truncate">/ ruseva_nails / admin</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link to="/" className="font-mono text-[11px] uppercase tracking-wider text-slate-400 hover:text-slate-100 hidden sm:inline">← site</Link>
-            <Button variant="ghost" size="sm" onClick={onLogout} className="h-8 rounded-md text-slate-300 hover:text-white hover:bg-slate-800">
-              <LogOut className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline font-mono text-xs uppercase tracking-wider">logout</span>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main
-        className="flex-1 container mx-auto px-3 sm:px-4 py-5 sm:py-6"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(148,163,184,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.06) 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
-        }}
+    <div className="min-h-screen flex" style={{ ...ADMIN_THEME, background: "var(--ad-bg)", color: "var(--ad-text)" }}>
+      {/* Desktop sidebar */}
+      <aside
+        className="hidden md:flex flex-col py-6 shrink-0"
+        style={{ width: 200, background: "var(--ad-sidebar)", color: "var(--ad-sidebar-muted)" }}
       >
-        <div className="mb-5">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400">admin / dashboard</p>
-          <h1 className="font-display text-2xl sm:text-3xl text-slate-100 mt-1">Админ панел</h1>
+        <div className="px-4 mb-6">
+          <div className="text-[10px] uppercase" style={{ color: "var(--ad-section-label)", letterSpacing: "0.22em" }}>
+            Ruseva Nails
+          </div>
+          <div className="mt-1 text-base font-medium" style={{ color: "var(--ad-gold-soft)" }}>
+            Админ
+          </div>
+          <div className="mt-2 h-px w-9" style={{ background: "var(--ad-gold)" }} />
+        </div>
+        {renderNav()}
+      </aside>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-40 flex">
+          <div className="flex flex-col py-6 w-[220px]" style={{ background: "var(--ad-sidebar)" }}>
+            <div className="px-4 mb-6">
+              <div className="text-[10px] uppercase" style={{ color: "var(--ad-section-label)", letterSpacing: "0.22em" }}>
+                Ruseva Nails
+              </div>
+              <div className="mt-1 text-base font-medium" style={{ color: "var(--ad-gold-soft)" }}>
+                Админ
+              </div>
+              <div className="mt-2 h-px w-9" style={{ background: "var(--ad-gold)" }} />
+            </div>
+            {renderNav(() => setMobileOpen(false))}
+          </div>
+          <button
+            type="button"
+            aria-label="Затвори"
+            onClick={() => setMobileOpen(false)}
+            className="flex-1 bg-black/40"
+          />
+        </div>
+      )}
+
+      <main className="flex-1 min-w-0" style={{ ...ADMIN_THEME }}>
+        {/* Mobile top bar */}
+        <div
+          className="md:hidden flex items-center justify-between px-4 py-3"
+          style={{ background: "var(--ad-sidebar)" }}
+        >
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            className="inline-flex items-center gap-2 text-sm"
+            style={{ color: "var(--ad-gold-soft)" }}
+          >
+            <Menu className="h-5 w-5" />
+            <span>Меню</span>
+          </button>
+          <span className="text-xs uppercase" style={{ letterSpacing: "0.18em", color: "var(--ad-sidebar-muted)" }}>
+            {currentLabel}
+          </span>
         </div>
 
-        <Tabs value={tab} onValueChange={setTab}>
-          {/* Mobile: dropdown selector */}
-          <div className="sm:hidden mb-4">
-            <Select value={tab} onValueChange={setTab}>
-              <SelectTrigger className="w-full h-11 bg-slate-900 border-slate-700 text-slate-100 font-mono text-sm uppercase tracking-wider"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {tabs.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <TabsList className="hidden sm:flex w-full h-auto p-1 bg-slate-900 border border-slate-800 rounded-md shadow-sm">
-            {tabs.map((t) => (
-              <TabsTrigger
-                key={t.value}
-                value={t.value}
-                className="flex-1 min-w-fit font-mono text-[11px] uppercase tracking-[0.14em] text-slate-400 data-[state=active]:bg-slate-100 data-[state=active]:text-slate-900 rounded-sm"
-              >
-                {t.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          <div className="[&_.bg-card]:bg-slate-900 [&_.bg-card]:border-slate-800 [&_.bg-card]:text-slate-100 [&_.bg-background]:bg-slate-950 [&_.text-mauve]:text-slate-100 [&_.text-muted-foreground]:text-slate-400 [&_.bg-secondary]:bg-slate-800 [&_.bg-secondary]:text-slate-100 [&_.border-border\/50]:border-slate-800 [&_.border-border]:border-slate-800 [&_table_thead]:bg-slate-800 [&_table_thead]:text-slate-200 [&_table_tbody_tr]:border-slate-800 [&_table_tbody_tr:nth-child(even)]:bg-slate-900/60 [&_input]:bg-slate-900 [&_input]:border-slate-700 [&_input]:text-slate-100 [&_textarea]:bg-slate-900 [&_textarea]:border-slate-700 [&_textarea]:text-slate-100">
-            <TabsContent value="calendar"><CalendarTab /></TabsContent>
-            <TabsContent value="slots"><SlotsTab /></TabsContent>
-            <TabsContent value="bookings"><BookingsTab /></TabsContent>
-            <TabsContent value="past"><PastSlotsTab /></TabsContent>
-            <TabsContent value="services"><ServicesTab /></TabsContent>
-            <TabsContent value="blocked"><BlockedTab /></TabsContent>
-          </div>
-        </Tabs>
+        <div className="px-4 sm:px-8 py-6 sm:py-8 max-w-6xl">
+          <header className="mb-6">
+            <h1
+              className="text-2xl sm:text-3xl"
+              style={{ color: "var(--ad-text)", fontFamily: "var(--font-sans)", fontWeight: 500, letterSpacing: "-0.01em" }}
+            >
+              {greeting}
+            </h1>
+            <div className="mt-2 h-[2px] w-9" style={{ background: "var(--ad-gold)" }} />
+            <p className="mt-3 text-sm" style={{ color: "var(--ad-muted)" }}>
+              {todayLabel} · {currentLabel}
+            </p>
+          </header>
+
+          <Tabs value={tab} onValueChange={setTab}>
+            <div className="[&_.bg-card]:bg-white [&_.bg-card]:text-[var(--ad-text)] [&_.bg-card]:border-[var(--ad-card-border)] [&_.bg-background]:bg-[var(--ad-bg)] [&_.text-mauve]:text-[var(--ad-text)] [&_.text-muted-foreground]:text-[var(--ad-muted)] [&_.bg-gradient-primary]:bg-[var(--ad-gold)] [&_.bg-gradient-primary]:text-white [&_.bg-secondary]:bg-[#F4EDDF] [&_.bg-secondary]:text-[var(--ad-text)] [&_table_thead]:bg-[#F4EDDF] [&_table_thead]:text-[var(--ad-text)]">
+              <TabsContent value="dashboard"><CalendarTab /></TabsContent>
+              <TabsContent value="calendar"><CalendarTab /></TabsContent>
+              <TabsContent value="slots"><SlotsTab /></TabsContent>
+              <TabsContent value="bookings"><BookingsTab /></TabsContent>
+              <TabsContent value="past"><PastSlotsTab /></TabsContent>
+              <TabsContent value="services"><ServicesTab /></TabsContent>
+              <TabsContent value="blocked"><BlockedTab /></TabsContent>
+            </div>
+          </Tabs>
+        </div>
       </main>
-
-      {/* Status footer bar */}
-      <footer className="border-t border-slate-800 bg-slate-900 py-2">
-        <div className="container mx-auto px-3 sm:px-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-slate-400">
-          <span>connection: live</span>
-          <span className="hidden sm:inline">ruseva_nails @ supabase</span>
-          <span>v1.0</span>
-
-        </div>
-      </footer>
     </div>
   );
 }
