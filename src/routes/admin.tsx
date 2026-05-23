@@ -114,7 +114,10 @@ function AdminPage() {
   }
 
   if (authState === "forbidden") {
-    return <AdminAccessDenied onLogout={handleLogout} />;
+    toast.error("Нямате достъп до админ панела.");
+    void supabase.auth.signOut();
+    void navigate({ to: "/" });
+    return null;
   }
 
   return <AdminDashboard onLogout={handleLogout} />;
