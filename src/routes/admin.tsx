@@ -49,6 +49,7 @@ function formatTimeInput(next: string, prev: string): string {
 }
 
 function AdminPage() {
+  const navigate = useNavigate();
   const [authState, setAuthState] = useState<AdminAuthState>("loading");
 
   useEffect(() => {
