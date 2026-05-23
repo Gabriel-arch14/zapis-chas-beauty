@@ -15,6 +15,7 @@ import { Check, Clock, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { PhoneInput } from "@/components/PhoneInput";
+import { isValidPhoneNumber } from "libphonenumber-js";
 
 export const Route = createFileRoute("/book/$specialistId")({
   head: () => ({
@@ -42,8 +43,23 @@ interface Service {
 
 const clientSchema = z.object({
   client_name: z.string().trim().min(2, "Името е задължително").max(100),
-  client_email: z.string().trim().email("Невалиден имейл").max(255),
-  client_phone: z.string().trim().min(6, "Невалиден телефон").max(30),
+  client_email: z
+    .string()
+    .trim()
+    .max(255)
+    .optional()
+    .or(z.literal(""))
+    .refine((v) => !v || z.string().email().safeParse(v).success, {
+      message: "Невалиден имейл",
+    }),
+  client_phone: z
+    .string()
+    .trim()
+    .min(6, "Телефонът е задължителен")
+    .max(30)
+    .refine((v) => isValidPhoneNumber(v.replace(/\s+/g, "")), {
+      message: "Невалиден телефонен номер",
+    }),
 });
 
 function BookPage() {
@@ -137,6 +153,7 @@ function BookPage() {
       return;
     }
     setSubmitting(true);
+    const emailValue = parsed.data.client_email ?? "";
     const { data: inserted, error } = await supabase
       .from("bookings")
       .insert({
@@ -144,7 +161,9 @@ function BookPage() {
         service_id: serviceId,
         booking_date: toDateKey(date),
         booking_time: time,
-        ...parsed.data,
+        client_name: parsed.data.client_name,
+        client_phone: parsed.data.client_phone,
+        client_email: emailValue,
         status: "confirmed",
       })
       .select("id,cancel_token")
@@ -166,7 +185,7 @@ function BookPage() {
         booking_id: inserted.id,
         cancel_url: cancelUrl,
         client_name: parsed.data.client_name,
-        client_email: parsed.data.client_email,
+        client_email: emailValue,
         client_phone: parsed.data.client_phone,
         specialist_name: specialist?.name ?? "",
         service_name: selectedService?.name ?? "",
@@ -331,11 +350,11 @@ function BookPage() {
                   <Input id="name" value={client.client_name} onChange={(e) => setClient({ ...client, client_name: e.target.value })} className="mt-1.5" placeholder="Иван Иванов" />
                 </div>
                 <div>
-                  <Label htmlFor="email">Имейл</Label>
-                  <Input id="email" type="email" value={client.client_email} onChange={(e) => setClient({ ...client, client_email: e.target.value })} className="mt-1.5" placeholder="ivan@example.com" />
+                  <Label htmlFor="email">Имейл <span className="text-mauve/60 text-xs font-normal">(по желание)</span></Label>
+                  <Input id="email" type="email" value={client.client_email} onChange={(e) => setClient({ ...client, client_email: e.target.value })} className="mt-1.5" placeholder="ivan@example.com (по желание)" />
                 </div>
                 <div>
-                  <Label htmlFor="phone">Телефон</Label>
+                  <Label htmlFor="phone">Телефон <span className="text-destructive">*</span></Label>
                   <PhoneInput id="phone" value={client.client_phone} onChange={(v) => setClient({ ...client, client_phone: v })} />
                 </div>
 
