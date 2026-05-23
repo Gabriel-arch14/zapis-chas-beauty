@@ -163,12 +163,8 @@ function BookPage() {
       toast.error(error?.code === "23505" ? "Този час вече е зает. Моля, изберете друг." : "Възникна грешка. Опитайте отново.");
       return;
     }
-    // Mark the slot as no longer available
-    await supabase
-      .from("available_slots")
-      .update({ is_available: false })
-      .eq("slot_date", toDateKey(date))
-      .eq("slot_time", time);
+    // Slot is auto-marked unavailable by the bookings trigger.
+
     const cancelUrl = `${window.location.origin}/cancel?token=${inserted.cancel_token}`;
     sendBookingWebhooks({
       data: {
