@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -49,6 +49,7 @@ function formatTimeInput(next: string, prev: string): string {
 }
 
 function AdminPage() {
+  const navigate = useNavigate();
   const [authState, setAuthState] = useState<AdminAuthState>("loading");
 
   useEffect(() => {
@@ -113,7 +114,10 @@ function AdminPage() {
   }
 
   if (authState === "forbidden") {
-    return <AdminAccessDenied onLogout={handleLogout} />;
+    toast.error("Нямате достъп до админ панела.");
+    void supabase.auth.signOut();
+    void navigate({ to: "/" });
+    return null;
   }
 
   return <AdminDashboard onLogout={handleLogout} />;
