@@ -46,6 +46,29 @@ export const cancelBookingByToken = createServerFn({ method: "POST" })
         (u): u is string => !!u,
       );
 
+      const cancelWebhookUrl =
+        "https://n8n-production-0be10.up.railway.app/webhook/cancel-booking";
+
+      const cancelPayload = {
+        client_email: booking.client_email,
+        client_name: booking.client_name,
+        service_name: booking.service_name,
+        booking_date: booking.booking_date,
+        booking_time: booking.booking_time,
+      };
+
+      const cancelResult = await fetch(cancelWebhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cancelPayload),
+      }).catch((err) => {
+        console.error("Cancel-booking webhook failed:", err);
+        return null;
+      });
+      if (cancelResult && !cancelResult.ok) {
+        console.error(`Cancel-booking webhook returned ${cancelResult.status}`);
+      }
+
       const payload = {
         event: "booking.cancelled" as const,
         booking_id: booking.id,
