@@ -243,6 +243,21 @@ export type Database = {
           was_already_cancelled: boolean
         }[]
       }
+      create_booking: {
+        Args: {
+          _booking_date: string
+          _booking_time: string
+          _client_email: string
+          _client_name: string
+          _client_phone: string
+          _service_id: string
+          _specialist_id: string
+        }
+        Returns: {
+          cancel_token: string
+          id: string
+        }[]
+      }
       get_booking_status: {
         Args: { _id: string }
         Returns: {
