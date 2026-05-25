@@ -374,7 +374,7 @@ function Index() {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">Локация</p>
-            <h2 className="text-3xl sm:text-4xl font-display font-semibold text-foreground">Къде ни намерите</h2>
+            <h2 className="text-3xl sm:text-4xl font-display font-semibold text-foreground">Къде да ни намерите</h2>
             <p className="mt-3 text-muted-foreground">Намираме се на удобно място в Габрово.</p>
           </div>
 
