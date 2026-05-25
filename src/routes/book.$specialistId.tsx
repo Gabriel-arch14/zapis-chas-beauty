@@ -154,25 +154,22 @@ function BookPage() {
     }
     setSubmitting(true);
     const emailValue = parsed.data.client_email ?? "";
-    const { data: inserted, error } = await supabase
-      .from("bookings")
-      .insert({
-        specialist_id: specialistId,
-        service_id: serviceId,
-        booking_date: toDateKey(date),
-        booking_time: time,
-        client_name: parsed.data.client_name,
-        client_phone: parsed.data.client_phone,
-        client_email: emailValue,
-        status: "confirmed",
-      })
-      .select("id,cancel_token")
-      .single();
+    const { data: insertedRows, error } = await supabase.rpc("create_booking", {
+      _specialist_id: specialistId,
+      _service_id: serviceId,
+      _booking_date: toDateKey(date),
+      _booking_time: time,
+      _client_name: parsed.data.client_name,
+      _client_phone: parsed.data.client_phone,
+      _client_email: emailValue,
+    });
     setSubmitting(false);
+    const inserted = Array.isArray(insertedRows) ? insertedRows[0] : insertedRows;
     if (error || !inserted) {
-      toast.error(error?.code === "23505" ? "Този час вече е зает. Моля, изберете друг." : "Възникна грешка. Опитайте отново.");
+      toast.error("Възникна грешка. Опитайте отново.");
       return;
     }
+
     // Mark the slot as no longer available
     await supabase
       .from("available_slots")
