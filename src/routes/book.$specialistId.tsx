@@ -296,7 +296,7 @@ function BookPage() {
           {step === 2 && (
             <div>
               <h2 className="font-display text-2xl text-mauve mb-4">Изберете дата</h2>
-              <p className="text-sm text-muted-foreground mb-4 text-center">Записванията са отворени само за текущия месец</p>
+              <p className="text-sm text-muted-foreground mb-4 text-center">Записванията са отворени само за текущия месец!</p>
               <div className="flex justify-center">
                 <Calendar
                   mode="single"
