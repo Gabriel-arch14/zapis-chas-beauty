@@ -220,7 +220,13 @@ function BookPage() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  // По подразбиране показваме само текущия месец.
+  // Когато стигнем 25-то число, отваряме и следващия месец до 10-то число включително,
+  // за да могат потребителите да си запазват час предварително.
+  const monthEnd =
+    today.getDate() >= 25
+      ? new Date(today.getFullYear(), today.getMonth() + 1, 10)
+      : new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
   const canNext = (step === 1 && serviceId) || (step === 2 && date) || (step === 3 && time);
 
