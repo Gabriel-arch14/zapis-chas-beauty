@@ -768,12 +768,18 @@ function ServicesTab() {
 
   const add = async () => {
     if (!form.specialist_id || !form.name.trim()) { toast.error("Изберете специалист и въведете име"); return; }
-    if (form.duration_minutes.trim() === "" || form.price.trim() === "") { toast.error("Попълнете времетраене и цена"); return; }
-    const duration_minutes = Number(form.duration_minutes);
-    const price = Number(form.price);
-    if (!Number.isFinite(duration_minutes) || duration_minutes <= 0) { toast.error("Въведете валидно времетраене"); return; }
-    if (!Number.isFinite(price) || price < 0) { toast.error("Въведете валидна цена"); return; }
-    const { error } = await supabase.from("services").insert({ specialist_id: form.specialist_id, name: form.name, duration_minutes, price });
+    const payload: Record<string, unknown> = { specialist_id: form.specialist_id, name: form.name };
+    if (form.duration_minutes.trim() !== "") {
+      const duration_minutes = Number(form.duration_minutes);
+      if (!Number.isFinite(duration_minutes) || duration_minutes < 0) { toast.error("Въведете валидно времетраене"); return; }
+      payload.duration_minutes = duration_minutes;
+    }
+    if (form.price.trim() !== "") {
+      const price = Number(form.price);
+      if (!Number.isFinite(price) || price < 0) { toast.error("Въведете валидна цена"); return; }
+      payload.price = price;
+    }
+    const { error } = await supabase.from("services").insert(payload);
     if (error) toast.error(getAdminErrorMessage(error));
     else { toast.success("Добавена"); setForm({ specialist_id: "", name: "", duration_minutes: "", price: "" }); load(); }
   };
