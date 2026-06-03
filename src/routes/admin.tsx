@@ -620,7 +620,7 @@ function BookingsTab() {
                   </td>
                   <td className="p-3">
                     <div>{r.specialists?.name}</div>
-                    <div className="text-xs text-muted-foreground">{r.services?.name} • {r.services && formatBGN(r.services.price)}</div>
+                    <div className="text-xs text-muted-foreground">{r.services?.name}{r.services && r.services.price != null ? ` • ${formatBGN(r.services.price)}` : ""}</div>
                   </td>
                   <td className="p-3">
                     <Select value={r.status} onValueChange={(v) => updateStatus(r.id, v)}>
