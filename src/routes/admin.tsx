@@ -261,10 +261,10 @@ interface BookingRow {
   id: string; client_name: string; client_email: string; client_phone: string;
   booking_date: string; booking_time: string; status: string;
   specialists: { name: string } | null;
-  services: { name: string; price: number } | null;
+  services: { name: string; price: number | null } | null;
 }
 interface SpecialistRow { id: string; name: string; specialty: string; photo_url: string | null; }
-interface ServiceRow { id: string; specialist_id: string; name: string; duration_minutes: number; price: number; }
+interface ServiceRow { id: string; specialist_id: string; name: string; duration_minutes: number | null; price: number | null; }
 
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [tab, setTab] = useState("calendar");
@@ -620,7 +620,7 @@ function BookingsTab() {
                   </td>
                   <td className="p-3">
                     <div>{r.specialists?.name}</div>
-                    <div className="text-xs text-muted-foreground">{r.services?.name} • {r.services && formatBGN(r.services.price)}</div>
+                    <div className="text-xs text-muted-foreground">{r.services?.name}{r.services && r.services.price != null ? ` • ${formatBGN(r.services.price)}` : ""}</div>
                   </td>
                   <td className="p-3">
                     <Select value={r.status} onValueChange={(v) => updateStatus(r.id, v)}>
@@ -650,7 +650,7 @@ function BookingsTab() {
                 </div>
                 <div className="text-right">
                   <div className="font-medium text-sm">{r.client_name}</div>
-                  {r.services && <div className="text-xs text-muted-foreground">{formatBGN(r.services.price)}</div>}
+                  {r.services && r.services.price != null && <div className="text-xs text-muted-foreground">{formatBGN(r.services.price)}</div>}
                 </div>
               </div>
               <div className="text-xs text-muted-foreground">
@@ -816,7 +816,7 @@ function ServicesTab() {
               <div key={s.id} className="flex items-center justify-between p-3 rounded-lg border bg-background">
                 <div>
                   <p className="font-medium">{s.name}</p>
-                  <p className="text-xs text-muted-foreground">{sp?.name} • {s.duration_minutes} мин. • {formatBGN(s.price)}</p>
+                  <p className="text-xs text-muted-foreground">{[sp?.name, s.duration_minutes != null ? `${s.duration_minutes} мин.` : null, s.price != null ? formatBGN(s.price) : null].filter(Boolean).join(" • ")}</p>
                 </div>
                 <Button size="icon" variant="ghost" onClick={() => remove(s.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
               </div>

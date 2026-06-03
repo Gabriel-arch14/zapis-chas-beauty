@@ -139,26 +139,26 @@ export type Database = {
       services: {
         Row: {
           created_at: string
-          duration_minutes: number
+          duration_minutes: number | null
           id: string
           name: string
-          price: number
+          price: number | null
           specialist_id: string
         }
         Insert: {
           created_at?: string
-          duration_minutes?: number
+          duration_minutes?: number | null
           id?: string
           name: string
-          price?: number
+          price?: number | null
           specialist_id: string
         }
         Update: {
           created_at?: string
-          duration_minutes?: number
+          duration_minutes?: number | null
           id?: string
           name?: string
-          price?: number
+          price?: number | null
           specialist_id?: string
         }
         Relationships: [

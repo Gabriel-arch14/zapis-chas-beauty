@@ -37,8 +37,8 @@ interface Specialist {
 interface Service {
   id: string;
   name: string;
-  duration_minutes: number;
-  price: number;
+  duration_minutes: number | null;
+  price: number | null;
 }
 
 const clientSchema = z.object({
@@ -280,11 +280,15 @@ function BookPage() {
                     <div className="flex justify-between items-start gap-3">
                       <div>
                         <p className="font-medium text-mauve">{svc.name}</p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                          <Clock className="h-3.5 w-3.5" /> {svc.duration_minutes} мин.
-                        </p>
+                        {svc.duration_minutes != null && (
+                          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                            <Clock className="h-3.5 w-3.5" /> {svc.duration_minutes} мин.
+                          </p>
+                        )}
                       </div>
-                      <span className="font-display font-semibold text-mauve">{formatBGN(svc.price)}</span>
+                      {svc.price != null && (
+                        <span className="font-display font-semibold text-mauve">{formatBGN(svc.price)}</span>
+                      )}
                     </div>
                   </button>
                 ))}
@@ -367,7 +371,9 @@ function BookPage() {
                   <p><span className="text-muted-foreground">Услуга:</span> <span className="font-medium text-mauve">{selectedService?.name}</span></p>
                   <p><span className="text-muted-foreground">Дата:</span> <span className="font-medium text-mauve">{date && formatDateBG(date)}</span></p>
                   <p><span className="text-muted-foreground">Час:</span> <span className="font-medium text-mauve">{time}</span></p>
-                  <p><span className="text-muted-foreground">Цена:</span> <span className="font-medium text-mauve">{selectedService && formatBGN(selectedService.price)}</span></p>
+                  {selectedService?.price != null && (
+                    <p><span className="text-muted-foreground">Цена:</span> <span className="font-medium text-mauve">{formatBGN(selectedService.price)}</span></p>
+                  )}
                 </div>
               </div>
             </div>
