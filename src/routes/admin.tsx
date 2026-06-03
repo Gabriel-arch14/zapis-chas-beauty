@@ -360,9 +360,15 @@ function CalendarTab() {
   const [missedCount, setMissedCount] = useState<number | null>(null);
 
   const load = async () => {
+    // Scope to a 4-month window around today to avoid loading all-time history.
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 3, 0);
     const { data } = await supabase
       .from("bookings")
       .select("id,client_name,client_email,client_phone,booking_date,booking_time,status,specialists(name),services(name,price)")
+      .gte("booking_date", toDateKey(start))
+      .lte("booking_date", toDateKey(end))
       .order("booking_date")
       .order("booking_time");
     setRows((data ?? []) as any);
@@ -371,9 +377,11 @@ function CalendarTab() {
     const now = new Date();
     const todayKey = toDateKey(now);
     const nowHM = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const sixtyAgo = new Date(now); sixtyAgo.setDate(sixtyAgo.getDate() - 60);
+    const sixtyAgoKey = toDateKey(sixtyAgo);
     const [{ data: avail }, { data: bks }] = await Promise.all([
-      supabase.from("available_slots").select("slot_date,slot_time").lte("slot_date", todayKey),
-      supabase.from("bookings").select("booking_date,booking_time,status").lte("booking_date", todayKey).neq("status", "cancelled"),
+      supabase.from("available_slots").select("slot_date,slot_time").gte("slot_date", sixtyAgoKey).lte("slot_date", todayKey),
+      supabase.from("bookings").select("booking_date,booking_time,status").gte("booking_date", sixtyAgoKey).lte("booking_date", todayKey).neq("status", "cancelled"),
     ]);
     const booked = new Set<string>();
     (bks ?? []).forEach((b: any) => booked.add(`${b.booking_date}|${normalizeTime(b.booking_time)}`));
