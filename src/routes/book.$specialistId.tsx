@@ -37,8 +37,8 @@ interface Specialist {
 interface Service {
   id: string;
   name: string;
-  duration_minutes: number;
-  price: number;
+  duration_minutes: number | null;
+  price: number | null;
 }
 
 const clientSchema = z.object({
