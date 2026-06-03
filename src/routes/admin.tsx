@@ -816,7 +816,7 @@ function ServicesTab() {
               <div key={s.id} className="flex items-center justify-between p-3 rounded-lg border bg-background">
                 <div>
                   <p className="font-medium">{s.name}</p>
-                  <p className="text-xs text-muted-foreground">{sp?.name} • {s.duration_minutes} мин. • {formatBGN(s.price)}</p>
+                  <p className="text-xs text-muted-foreground">{[sp?.name, s.duration_minutes != null ? `${s.duration_minutes} мин.` : null, s.price != null ? formatBGN(s.price) : null].filter(Boolean).join(" • ")}</p>
                 </div>
                 <Button size="icon" variant="ghost" onClick={() => remove(s.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
               </div>
