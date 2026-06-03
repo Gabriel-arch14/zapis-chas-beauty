@@ -650,7 +650,7 @@ function BookingsTab() {
                 </div>
                 <div className="text-right">
                   <div className="font-medium text-sm">{r.client_name}</div>
-                  {r.services && <div className="text-xs text-muted-foreground">{formatBGN(r.services.price)}</div>}
+                  {r.services && r.services.price != null && <div className="text-xs text-muted-foreground">{formatBGN(r.services.price)}</div>}
                 </div>
               </div>
               <div className="text-xs text-muted-foreground">
