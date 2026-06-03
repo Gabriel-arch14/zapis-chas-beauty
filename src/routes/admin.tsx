@@ -261,10 +261,10 @@ interface BookingRow {
   id: string; client_name: string; client_email: string; client_phone: string;
   booking_date: string; booking_time: string; status: string;
   specialists: { name: string } | null;
-  services: { name: string; price: number } | null;
+  services: { name: string; price: number | null } | null;
 }
 interface SpecialistRow { id: string; name: string; specialty: string; photo_url: string | null; }
-interface ServiceRow { id: string; specialist_id: string; name: string; duration_minutes: number; price: number; }
+interface ServiceRow { id: string; specialist_id: string; name: string; duration_minutes: number | null; price: number | null; }
 
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [tab, setTab] = useState("calendar");
