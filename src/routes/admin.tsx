@@ -768,7 +768,7 @@ function ServicesTab() {
 
   const add = async () => {
     if (!form.specialist_id || !form.name.trim()) { toast.error("Изберете специалист и въведете име"); return; }
-    const payload: Record<string, unknown> = { specialist_id: form.specialist_id, name: form.name };
+    const payload = { specialist_id: form.specialist_id, name: form.name } as { specialist_id: string; name: string; duration_minutes?: number; price?: number };
     if (form.duration_minutes.trim() !== "") {
       const duration_minutes = Number(form.duration_minutes);
       if (!Number.isFinite(duration_minutes) || duration_minutes < 0) { toast.error("Въведете валидно времетраене"); return; }
@@ -779,7 +779,7 @@ function ServicesTab() {
       if (!Number.isFinite(price) || price < 0) { toast.error("Въведете валидна цена"); return; }
       payload.price = price;
     }
-    const { error } = await supabase.from("services").insert(payload);
+    const { error } = await supabase.from("services").insert(payload as any);
     if (error) toast.error(getAdminErrorMessage(error));
     else { toast.success("Добавена"); setForm({ specialist_id: "", name: "", duration_minutes: "", price: "" }); load(); }
   };
