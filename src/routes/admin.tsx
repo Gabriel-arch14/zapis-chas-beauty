@@ -699,9 +699,11 @@ function PastSlotsTab() {
     const todayKey = toDateKey(now);
     const nowHM = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
+    const ninetyAgo = new Date(now); ninetyAgo.setDate(ninetyAgo.getDate() - 90);
+    const ninetyAgoKey = toDateKey(ninetyAgo);
     const [{ data: avail }, { data: bks }] = await Promise.all([
-      supabase.from("available_slots").select("slot_date,slot_time").lte("slot_date", todayKey).order("slot_date", { ascending: false }).order("slot_time"),
-      supabase.from("bookings").select("booking_date,booking_time,status").lte("booking_date", todayKey).neq("status", "cancelled"),
+      supabase.from("available_slots").select("slot_date,slot_time").gte("slot_date", ninetyAgoKey).lte("slot_date", todayKey).order("slot_date", { ascending: false }).order("slot_time"),
+      supabase.from("bookings").select("booking_date,booking_time,status").gte("booking_date", ninetyAgoKey).lte("booking_date", todayKey).neq("status", "cancelled"),
     ]);
 
     const bookedSet = new Set<string>();
