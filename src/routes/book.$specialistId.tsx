@@ -280,11 +280,15 @@ function BookPage() {
                     <div className="flex justify-between items-start gap-3">
                       <div>
                         <p className="font-medium text-mauve">{svc.name}</p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                          <Clock className="h-3.5 w-3.5" /> {svc.duration_minutes} мин.
-                        </p>
+                        {svc.duration_minutes != null && (
+                          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                            <Clock className="h-3.5 w-3.5" /> {svc.duration_minutes} мин.
+                          </p>
+                        )}
                       </div>
-                      <span className="font-display font-semibold text-mauve">{formatBGN(svc.price)}</span>
+                      {svc.price != null && (
+                        <span className="font-display font-semibold text-mauve">{formatBGN(svc.price)}</span>
+                      )}
                     </div>
                   </button>
                 ))}
