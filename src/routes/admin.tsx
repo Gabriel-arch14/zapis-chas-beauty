@@ -556,8 +556,16 @@ function BookingsTab() {
   const load = async () => {
     let q = supabase.from("bookings").select("id,client_name,client_email,client_phone,booking_date,booking_time,status,specialists(name),services(name,price)").order("booking_date", { ascending: false }).order("booking_time");
     if (statusFilter !== "all") q = q.eq("status", statusFilter);
-    if (dateFilter) q = q.eq("booking_date", toDateKey(dateFilter));
-    const { data } = await q;
+    if (dateFilter) {
+      q = q.eq("booking_date", toDateKey(dateFilter));
+    } else {
+      // Default window: last 90 days + next 60 days, to keep payload small.
+      const now = new Date();
+      const past = new Date(now); past.setDate(past.getDate() - 90);
+      const future = new Date(now); future.setDate(future.getDate() + 60);
+      q = q.gte("booking_date", toDateKey(past)).lte("booking_date", toDateKey(future));
+    }
+    const { data } = await q.limit(500);
     setRows((data ?? []) as any);
   };
   useEffect(() => { load(); }, [statusFilter, dateFilter]);
