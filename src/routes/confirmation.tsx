@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Check, Calendar, Mail, Home, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDateBG } from "@/lib/booking";
-import { cancelBookingByToken } from "@/server/cancellation.functions";
+import { cancelBookingByToken } from "@/lib/cancellation.functions";
 
 export const Route = createFileRoute("/confirmation")({
   validateSearch: (s: Record<string, unknown>) => ({
