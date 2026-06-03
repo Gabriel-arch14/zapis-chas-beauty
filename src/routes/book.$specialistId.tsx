@@ -371,7 +371,9 @@ function BookPage() {
                   <p><span className="text-muted-foreground">Услуга:</span> <span className="font-medium text-mauve">{selectedService?.name}</span></p>
                   <p><span className="text-muted-foreground">Дата:</span> <span className="font-medium text-mauve">{date && formatDateBG(date)}</span></p>
                   <p><span className="text-muted-foreground">Час:</span> <span className="font-medium text-mauve">{time}</span></p>
-                  <p><span className="text-muted-foreground">Цена:</span> <span className="font-medium text-mauve">{selectedService && formatBGN(selectedService.price)}</span></p>
+                  {selectedService?.price != null && (
+                    <p><span className="text-muted-foreground">Цена:</span> <span className="font-medium text-mauve">{formatBGN(selectedService.price)}</span></p>
+                  )}
                 </div>
               </div>
             </div>
