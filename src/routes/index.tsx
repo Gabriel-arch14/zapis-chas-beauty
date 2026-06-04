@@ -83,6 +83,15 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [mapOpen, setMapOpen] = useState(false);
+  const [services, setServices] = useState<ServiceItem[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("services")
+      .select("id,name,duration_minutes,price")
+      .order("price", { ascending: true, nullsFirst: false })
+      .then(({ data }) => setServices((data ?? []) as ServiceItem[]));
+  }, []);
 
   useEffect(() => {
     if (!mapOpen) return;
