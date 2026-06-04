@@ -207,15 +207,24 @@ function Index() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border max-w-5xl mx-auto border border-border">
-            {SERVICES.map((s) => (
-              <div key={s.name} className="bg-card p-6 sm:p-7 transition-smooth hover:bg-background">
+            {services.map((s) => (
+              <div key={s.id} className="bg-card p-6 sm:p-7 transition-smooth hover:bg-background">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <h3 className="font-display text-xl text-foreground">{s.name}</h3>
-                  <span className="text-sm font-medium text-foreground whitespace-nowrap">{s.price}</span>
+                  {s.price != null && (
+                    <span className="text-sm font-medium text-foreground whitespace-nowrap">{formatBGN(s.price)}</span>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                {s.duration_minutes != null && (
+                  <p className="text-sm text-muted-foreground leading-relaxed">{s.duration_minutes} мин.</p>
+                )}
               </div>
             ))}
+            {services.length === 0 && (
+              <div className="bg-card p-6 sm:p-7 col-span-full text-center text-sm text-muted-foreground">
+                Няма налични услуги.
+              </div>
+            )}
           </div>
 
           <div className="text-center mt-12">
