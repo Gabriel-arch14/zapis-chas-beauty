@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { supabase } from "@/integrations/supabase/client";
+import { formatBGN } from "@/lib/booking";
 import {
   Sparkles,
   MapPin,
@@ -37,14 +39,12 @@ const MAP_SRC = "https://www.google.com/maps?q=ул.+Христо+Смирнен
 const MAPS_LINK = "https://www.google.com/maps/search/?api=1&query=%D1%83%D0%BB.+%D0%A5%D1%80%D0%B8%D1%81%D1%82%D0%BE+%D0%A1%D0%BC%D0%B8%D1%80%D0%BD%D0%B5%D0%BD%D1%81%D0%BA%D0%B8+17%2C+%D0%93%D0%B0%D0%B1%D1%80%D0%BE%D0%B2%D0%BE+5302";
 const FB_LINK = "https://www.facebook.com/profile.php?id=100082830309797";
 
-const SERVICES = [
-  { name: "Маникюр", desc: "Класическа грижа за нокти и кутикули", price: "от 15 лв. / 7.67 €" },
-  { name: "Педикюр", desc: "Цялостна обработка на стъпала и нокти", price: "от 30 лв. / 15.34 €" },
-  { name: "Гел лак", desc: "Дълготраен и блестящ цвят за до 3 седмици", price: "от 20 лв. / 10.23 €" },
-  { name: "Изграждане", desc: "Удължаване и оформяне с гел или акрил", price: "от 40 лв. / 20.45 €" },
-  { name: "Декорации", desc: "Nail art, камъчета, фолио, ръчно рисуване", price: "от 5 лв. / 2.56 €" },
-  { name: "Сваляне", desc: "Деликатно премахване на гел лак или изграждане", price: "от 10 лв. / 5.11 €" },
-];
+interface ServiceItem {
+  id: string;
+  name: string;
+  duration_minutes: number | null;
+  price: number | null;
+}
 
 const PERKS = [
   { icon: Sparkles, title: "Лесно онлайн записване", desc: "Резервирайте час за минута, без обаждания." },
@@ -83,6 +83,15 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [mapOpen, setMapOpen] = useState(false);
+  const [services, setServices] = useState<ServiceItem[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("services")
+      .select("id,name,duration_minutes,price")
+      .order("price", { ascending: true, nullsFirst: false })
+      .then(({ data }) => setServices((data ?? []) as ServiceItem[]));
+  }, []);
 
   useEffect(() => {
     if (!mapOpen) return;
@@ -198,15 +207,24 @@ function Index() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border max-w-5xl mx-auto border border-border">
-            {SERVICES.map((s) => (
-              <div key={s.name} className="bg-card p-6 sm:p-7 transition-smooth hover:bg-background">
+            {services.map((s) => (
+              <div key={s.id} className="bg-card p-6 sm:p-7 transition-smooth hover:bg-background">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <h3 className="font-display text-xl text-foreground">{s.name}</h3>
-                  <span className="text-sm font-medium text-foreground whitespace-nowrap">{s.price}</span>
+                  {s.price != null && (
+                    <span className="text-sm font-medium text-foreground whitespace-nowrap">{formatBGN(s.price)}</span>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                {s.duration_minutes != null && (
+                  <p className="text-sm text-muted-foreground leading-relaxed">{s.duration_minutes} мин.</p>
+                )}
               </div>
             ))}
+            {services.length === 0 && (
+              <div className="bg-card p-6 sm:p-7 col-span-full text-center text-sm text-muted-foreground">
+                Няма налични услуги.
+              </div>
+            )}
           </div>
 
           <div className="text-center mt-12">
