@@ -39,14 +39,12 @@ const MAP_SRC = "https://www.google.com/maps?q=ул.+Христо+Смирнен
 const MAPS_LINK = "https://www.google.com/maps/search/?api=1&query=%D1%83%D0%BB.+%D0%A5%D1%80%D0%B8%D1%81%D1%82%D0%BE+%D0%A1%D0%BC%D0%B8%D1%80%D0%BD%D0%B5%D0%BD%D1%81%D0%BA%D0%B8+17%2C+%D0%93%D0%B0%D0%B1%D1%80%D0%BE%D0%B2%D0%BE+5302";
 const FB_LINK = "https://www.facebook.com/profile.php?id=100082830309797";
 
-const SERVICES = [
-  { name: "Маникюр", desc: "Класическа грижа за нокти и кутикули", price: "от 15 лв. / 7.67 €" },
-  { name: "Педикюр", desc: "Цялостна обработка на стъпала и нокти", price: "от 30 лв. / 15.34 €" },
-  { name: "Гел лак", desc: "Дълготраен и блестящ цвят за до 3 седмици", price: "от 20 лв. / 10.23 €" },
-  { name: "Изграждане", desc: "Удължаване и оформяне с гел или акрил", price: "от 40 лв. / 20.45 €" },
-  { name: "Декорации", desc: "Nail art, камъчета, фолио, ръчно рисуване", price: "от 5 лв. / 2.56 €" },
-  { name: "Сваляне", desc: "Деликатно премахване на гел лак или изграждане", price: "от 10 лв. / 5.11 €" },
-];
+interface ServiceItem {
+  id: string;
+  name: string;
+  duration_minutes: number | null;
+  price: number | null;
+}
 
 const PERKS = [
   { icon: Sparkles, title: "Лесно онлайн записване", desc: "Резервирайте час за минута, без обаждания." },
