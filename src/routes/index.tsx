@@ -202,29 +202,37 @@ function Index() {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">Услуги</p>
-            <h2 className="text-3xl sm:text-4xl font-display font-semibold text-foreground">Услуги и цени</h2>
+            <h2 className="text-3xl sm:text-4xl font-display font-semibold text-foreground">Услуги</h2>
             <p className="mt-3 text-muted-foreground">Подбрани процедури за безупречен резултат</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border max-w-5xl mx-auto border border-border">
-            {services.map((s) => (
-              <div key={s.id} className="bg-card p-6 sm:p-7 transition-smooth hover:bg-background">
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <h3 className="font-display text-xl text-foreground">{s.name}</h3>
-                  {s.price != null && (
-                    <span className="text-sm font-medium text-foreground whitespace-nowrap">{formatBGN(s.price)}</span>
-                  )}
-                </div>
-                {s.duration_minutes != null && (
-                  <p className="text-sm text-muted-foreground leading-relaxed">{s.duration_minutes} мин.</p>
-                )}
-              </div>
-            ))}
-            {services.length === 0 && (
-              <div className="bg-card p-6 sm:p-7 col-span-full text-center text-sm text-muted-foreground">
-                Няма налични услуги.
-              </div>
-            )}
+          <div className="max-w-3xl mx-auto">
+            <ul className="divide-y divide-border border-y border-border bg-card">
+              {services.map((s) => (
+                <li
+                  key={s.id}
+                  className="group flex items-center gap-4 px-6 sm:px-8 py-5 transition-smooth hover:bg-background"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-gold shrink-0" aria-hidden />
+                  <h3 className="font-display text-lg sm:text-xl text-foreground flex-1">{s.name}</h3>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground whitespace-nowrap">
+                    {s.duration_minutes != null && <span>{s.duration_minutes} мин.</span>}
+                    {s.price != null && (
+                      <span className="font-medium text-foreground">{formatBGN(s.price)}</span>
+                    )}
+                  </div>
+                </li>
+              ))}
+              {services.length === 0 && (
+                <li className="px-6 sm:px-8 py-8 text-center text-sm text-muted-foreground">
+                  Няма налични услуги.
+                </li>
+              )}
+            </ul>
+
+            <p className="mt-8 text-center text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
+              Цените и времетраенето на всяка процедура се уточняват индивидуално според състоянието на ноктите и избрания дизайн. За повече информация — свържете се с нас.
+            </p>
           </div>
 
           <div className="text-center mt-12">
