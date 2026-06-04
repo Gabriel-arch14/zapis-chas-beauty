@@ -203,7 +203,9 @@ function Index() {
           <div className="text-center max-w-2xl mx-auto mb-12">
             <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">Услуги</p>
             <h2 className="text-3xl sm:text-4xl font-display font-semibold text-foreground">Услуги</h2>
-            <p className="mt-3 text-muted-foreground">Подбрани процедури за безупречен резултат</p>
+            <p className="mt-3 text-muted-foreground">
+              Поглезете се с професионална грижа за вашите ръце и крака — прецизна работа, качествени продукти и внимание към всеки детайл, за да си тръгнете с усмивка и безупречен маникюр.
+            </p>
           </div>
 
           <div className="max-w-3xl mx-auto">
