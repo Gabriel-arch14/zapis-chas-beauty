@@ -16,6 +16,9 @@ const payloadSchema = z.object({
 export const sendBookingWebhooks = createServerFn({ method: "POST" })
   .inputValidator((input) => payloadSchema.parse(input))
   .handler(async ({ data }) => {
+    console.log("[booking.created] serverFn invoked for", data.client_email);
+    const hasKey = !!process.env.RESEND_API_KEY;
+    console.log("[booking.created] RESEND_API_KEY present:", hasKey);
     const { sendBookingConfirmationEmail } = await import("./email.server");
     try {
       await sendBookingConfirmationEmail({
@@ -27,6 +30,7 @@ export const sendBookingWebhooks = createServerFn({ method: "POST" })
         specialist_name: data.specialist_name,
         cancel_url: data.cancel_url,
       });
+      console.log("[booking.created] sendBookingConfirmationEmail completed");
     } catch (e) {
       console.error("[booking.created] email send failed:", e);
     }
