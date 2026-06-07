@@ -1,22 +1,37 @@
 // Server-only Resend email sender for booking confirmation & cancellation.
 // Never import from client code — the `.server.ts` suffix is enforced by the bundler.
 
-async function getResendApiKey(): Promise<string | undefined> {
-  // Prefer Cloudflare Workers env binding (secrets set via dashboard / wrangler).
-  try {
-    const mod = await import(/* @vite-ignore */ "cloudflare:workers" as string);
-    const fromCf = (mod as { env?: Record<string, string | undefined> }).env?.RESEND_API_KEY;
-    if (fromCf) return fromCf;
-  } catch {
-    // Not running in a Cloudflare Worker (e.g. local dev / Node) — fall through.
-  }
-  return process.env.RESEND_API_KEY;
+/**
+ * Read RESEND_API_KEY from the Cloudflare Worker runtime.
+ *
+ * The @cloudflare/vite-plugin (used by @lovable.dev/vite-tanstack-config)
+ * populates `process.env` with the Worker's bindings (vars + secrets) at
+ * request time when `nodejs_compat` is enabled — which it is in
+ * `wrangler.jsonc`. So inside a server function handler `process.env.X`
+ * resolves to the secret value at runtime.
+ *
+ * We avoid `import("cloudflare:workers")` here because Rollup cannot resolve
+ * that virtual module during the Vite build and the build fails. We also
+ * defensively try `globalThis` in case the runtime exposes env differently.
+ */
+function getResendApiKey(): string | undefined {
+  // Primary: standard process.env (works in Cloudflare Workers with
+  // nodejs_compat + @cloudflare/vite-plugin, and in local Node dev).
+  const fromProcess =
+    typeof process !== "undefined" ? process.env?.RESEND_API_KEY : undefined;
+  if (fromProcess) return fromProcess;
+
+  // Fallback: some Worker runtimes attach bindings to globalThis.
+  const g = globalThis as unknown as { RESEND_API_KEY?: string; env?: Record<string, string | undefined> };
+  if (g.RESEND_API_KEY) return g.RESEND_API_KEY;
+  if (g.env?.RESEND_API_KEY) return g.env.RESEND_API_KEY;
+
+  return undefined;
 }
 
 const FROM = "Ruseva Nails <noreply@rusevanails.com>";
 
 function formatDateBG(dateStr: string): string {
-  // dateStr expected as YYYY-MM-DD
   try {
     const [y, m, d] = dateStr.split("-").map(Number);
     const date = new Date(Date.UTC(y, m - 1, d));
@@ -32,7 +47,6 @@ function formatDateBG(dateStr: string): string {
 }
 
 function formatTime(timeStr: string): string {
-  // Trim seconds if present: "14:30:00" -> "14:30"
   return timeStr?.slice(0, 5) ?? timeStr;
 }
 
@@ -99,7 +113,8 @@ async function sendViaResend(payload: {
   subject: string;
   html: string;
 }): Promise<void> {
-  const apiKey = await getResendApiKey();
+  const apiKey = getResendApiKey();
+  console.log("[email] RESEND_API_KEY present:", !!apiKey);
   if (!apiKey) {
     console.error("[email] RESEND_API_KEY is not set — skipping send");
     return;
@@ -108,22 +123,28 @@ async function sendViaResend(payload: {
     console.warn("[email] No recipient — skipping send");
     return;
   }
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      from: FROM,
-      to: [payload.to],
-      subject: payload.subject,
-      html: payload.html,
-    }),
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    console.error(`[email] Resend returned ${res.status}: ${body}`);
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        from: FROM,
+        to: [payload.to],
+        subject: payload.subject,
+        html: payload.html,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error(`[email] Resend returned ${res.status}: ${body}`);
+    } else {
+      console.log("[email] Resend accepted email for", payload.to);
+    }
+  } catch (e) {
+    console.error("[email] fetch to Resend failed:", e);
   }
 }
 
