@@ -40,21 +40,8 @@ export const cancelBookingByToken = createServerFn({ method: "POST" })
       throw new Error("Резервацията не е намерена или линкът е невалиден.");
     }
 
-    // Only send email on first cancellation, not on idempotent re-hits.
-    if (!booking.was_already_cancelled) {
-      const { sendBookingCancellationEmail } = await import("./email.server");
-      try {
-        await sendBookingCancellationEmail({
-          client_email: booking.client_email,
-          client_name: booking.client_name,
-          service_name: booking.service_name ?? "",
-          booking_date: booking.booking_date,
-          booking_time: booking.booking_time,
-        });
-      } catch (e) {
-        console.error("[booking.cancelled] email send failed:", e);
-      }
-    }
-
+    // Email is sent from the client via the Supabase Edge Function
+    // `send-booking-email` after this server fn returns. This keeps the
+    // Resend dependency entirely off the Cloudflare Worker runtime.
     return booking;
   });
