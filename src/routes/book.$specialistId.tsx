@@ -78,7 +78,7 @@ function BookPage() {
   const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set());
   const [client, setClient] = useState({ client_name: "", client_email: "", client_phone: "+359" });
   const [submitting, setSubmitting] = useState(false);
-  const sendBookingWebhooksFn = useServerFn(sendBookingWebhooks);
+  
 
   // Load specialist + services
   useEffect(() => {
