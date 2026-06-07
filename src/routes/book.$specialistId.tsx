@@ -179,19 +179,23 @@ function BookPage() {
       .eq("slot_date", toDateKey(date))
       .eq("slot_time", time);
     const cancelUrl = `${window.location.origin}/cancel?token=${inserted.cancel_token}`;
-    sendBookingWebhooks({
-      data: {
-        booking_id: inserted.id,
-        cancel_url: cancelUrl,
-        client_name: parsed.data.client_name,
-        client_email: emailValue,
-        client_phone: parsed.data.client_phone,
-        specialist_name: specialist?.name ?? "",
-        service_name: selectedService?.name ?? "",
-        booking_date: toDateKey(date),
-        booking_time: time,
-      },
-    }).catch((e: unknown) => console.error("Webhook dispatch failed:", e));
+    try {
+      await sendBookingWebhooksFn({
+        data: {
+          booking_id: inserted.id,
+          cancel_url: cancelUrl,
+          client_name: parsed.data.client_name,
+          client_email: emailValue,
+          client_phone: parsed.data.client_phone,
+          specialist_name: specialist?.name ?? "",
+          service_name: selectedService?.name ?? "",
+          booking_date: toDateKey(date),
+          booking_time: time,
+        },
+      });
+    } catch (e) {
+      console.error("Webhook dispatch failed:", e);
+    }
     const params = new URLSearchParams({
       specialist: specialist?.name ?? "",
       service: selectedService?.name ?? "",
