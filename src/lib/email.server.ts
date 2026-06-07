@@ -1,6 +1,18 @@
 // Server-only Resend email sender for booking confirmation & cancellation.
 // Never import from client code — the `.server.ts` suffix is enforced by the bundler.
 
+async function getResendApiKey(): Promise<string | undefined> {
+  // Prefer Cloudflare Workers env binding (secrets set via dashboard / wrangler).
+  try {
+    const mod = await import("cloudflare:workers");
+    const fromCf = (mod as { env?: Record<string, string | undefined> }).env?.RESEND_API_KEY;
+    if (fromCf) return fromCf;
+  } catch {
+    // Not running in a Cloudflare Worker (e.g. local dev / Node) — fall through.
+  }
+  return process.env.RESEND_API_KEY;
+}
+
 const FROM = "Ruseva Nails <noreply@rusevanails.com>";
 
 function formatDateBG(dateStr: string): string {
