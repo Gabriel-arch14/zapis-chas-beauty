@@ -4,7 +4,7 @@
 async function getResendApiKey(): Promise<string | undefined> {
   // Prefer Cloudflare Workers env binding (secrets set via dashboard / wrangler).
   try {
-    const mod = await import("cloudflare:workers");
+    const mod = await import(/* @vite-ignore */ "cloudflare:workers" as string);
     const fromCf = (mod as { env?: Record<string, string | undefined> }).env?.RESEND_API_KEY;
     if (fromCf) return fromCf;
   } catch {
