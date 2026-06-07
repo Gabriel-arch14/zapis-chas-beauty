@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { sendBookingWebhooks } from "@/lib/webhooks.functions";
+import { sendBookingEmail } from "@/lib/sendBookingEmail";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
@@ -78,7 +78,7 @@ function BookPage() {
   const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set());
   const [client, setClient] = useState({ client_name: "", client_email: "", client_phone: "+359" });
   const [submitting, setSubmitting] = useState(false);
-  const sendBookingWebhooksFn = useServerFn(sendBookingWebhooks);
+  
 
   // Load specialist + services
   useEffect(() => {
@@ -180,21 +180,18 @@ function BookPage() {
       .eq("slot_time", time);
     const cancelUrl = `${window.location.origin}/cancel?token=${inserted.cancel_token}`;
     try {
-      await sendBookingWebhooksFn({
-        data: {
-          booking_id: inserted.id,
-          cancel_url: cancelUrl,
-          client_name: parsed.data.client_name,
-          client_email: emailValue,
-          client_phone: parsed.data.client_phone,
-          specialist_name: specialist?.name ?? "",
-          service_name: selectedService?.name ?? "",
-          booking_date: toDateKey(date),
-          booking_time: time,
-        },
+      await sendBookingEmail({
+        eventType: "confirmation",
+        client_email: emailValue,
+        client_name: parsed.data.client_name,
+        specialist_name: specialist?.name ?? "",
+        service_name: selectedService?.name ?? "",
+        booking_date: toDateKey(date),
+        booking_time: time,
+        cancel_url: cancelUrl,
       });
     } catch (e) {
-      console.error("Webhook dispatch failed:", e);
+      console.error("Email dispatch failed:", e);
     }
     const params = new URLSearchParams({
       specialist: specialist?.name ?? "",
