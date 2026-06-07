@@ -40,62 +40,20 @@ export const cancelBookingByToken = createServerFn({ method: "POST" })
       throw new Error("Резервацията не е намерена или линкът е невалиден.");
     }
 
-    // Only fire webhook on first cancellation, not on idempotent re-hits.
+    // Only send email on first cancellation, not on idempotent re-hits.
     if (!booking.was_already_cancelled) {
-      const urls = [process.env.WEBHOOK_URL1, process.env.WEBHOOK_URL2].filter(
-        (u): u is string => !!u,
-      );
-
-      const cancelWebhookUrl =
-        "https://n8n-production-0be10.up.railway.app/webhook/cancel-booking";
-
-      const cancelPayload = {
-        client_email: booking.client_email,
-        client_name: booking.client_name,
-        service_name: booking.service_name,
-        booking_date: booking.booking_date,
-        booking_time: booking.booking_time,
-      };
-
-      const cancelResult = await fetch(cancelWebhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(cancelPayload),
-      }).catch((err) => {
-        console.error("Cancel-booking webhook failed:", err);
-        return null;
-      });
-      if (cancelResult && !cancelResult.ok) {
-        console.error(`Cancel-booking webhook returned ${cancelResult.status}`);
+      const { sendBookingCancellationEmail } = await import("./email.server");
+      try {
+        await sendBookingCancellationEmail({
+          client_email: booking.client_email,
+          client_name: booking.client_name,
+          service_name: booking.service_name ?? "",
+          booking_date: booking.booking_date,
+          booking_time: booking.booking_time,
+        });
+      } catch (e) {
+        console.error("[booking.cancelled] email send failed:", e);
       }
-
-      const payload = {
-        event: "booking.cancelled" as const,
-        booking_id: booking.id,
-        client_name: booking.client_name,
-        client_email: booking.client_email,
-        client_phone: booking.client_phone,
-        specialist_name: booking.specialist_name,
-        service_name: booking.service_name,
-        booking_date: booking.booking_date,
-        booking_time: booking.booking_time,
-        cancelled_at: booking.cancelled_at,
-        status: booking.status,
-      };
-
-      const results = await Promise.allSettled(
-        urls.map((url) =>
-          fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          }),
-        ),
-      );
-      results.forEach((r, i) => {
-        if (r.status === "rejected") console.error(`Cancel webhook ${i + 1} failed:`, r.reason);
-        else if (!r.value.ok) console.error(`Cancel webhook ${i + 1} returned ${r.value.status}`);
-      });
     }
 
     return booking;
