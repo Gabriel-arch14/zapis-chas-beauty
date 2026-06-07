@@ -17,14 +17,14 @@ export const sendBookingWebhooks = createServerFn({ method: "POST" })
   .inputValidator((input) => payloadSchema.parse(input))
   .handler(async ({ data }) => {
     console.log("[booking.created] serverFn invoked for", data.client_email);
-    let hasKey = !!process.env.RESEND_API_KEY;
-    if (!hasKey) {
-      try {
-        const mod = await import(/* @vite-ignore */ ("cloudflare:workers" as string));
-        hasKey = !!(mod as { env?: Record<string, string | undefined> }).env?.RESEND_API_KEY;
-      } catch {}
-    }
-    console.log("[booking.created] RESEND_API_KEY present:", hasKey);
+    const hasProcessKey = typeof process !== "undefined" && !!process.env?.RESEND_API_KEY;
+    const g = globalThis as unknown as { RESEND_API_KEY?: string; env?: Record<string, string | undefined> };
+    const hasGlobalKey = !!(g.RESEND_API_KEY || g.env?.RESEND_API_KEY);
+    console.log(
+      "[booking.created] RESEND_API_KEY present:",
+      hasProcessKey || hasGlobalKey,
+      "(process:", hasProcessKey, "global:", hasGlobalKey, ")"
+    );
     const { sendBookingConfirmationEmail } = await import("./email.server");
     try {
       await sendBookingConfirmationEmail({
