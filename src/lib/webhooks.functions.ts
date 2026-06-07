@@ -16,29 +16,19 @@ const payloadSchema = z.object({
 export const sendBookingWebhooks = createServerFn({ method: "POST" })
   .inputValidator((input) => payloadSchema.parse(input))
   .handler(async ({ data }) => {
-    const urls = [process.env.WEBHOOK_URL1, process.env.WEBHOOK_URL2].filter(
-      (u): u is string => !!u,
-    );
-
-    const payload = { event: "booking.created" as const, ...data };
-
-    const results = await Promise.allSettled(
-      urls.map((url) =>
-        fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }),
-      ),
-    );
-
-    results.forEach((r, i) => {
-      if (r.status === "rejected") {
-        console.error(`Webhook ${i + 1} failed:`, r.reason);
-      } else if (!r.value.ok) {
-        console.error(`Webhook ${i + 1} returned ${r.value.status}`);
-      }
-    });
-
+    const { sendBookingConfirmationEmail } = await import("./email.server");
+    try {
+      await sendBookingConfirmationEmail({
+        client_email: data.client_email,
+        client_name: data.client_name,
+        service_name: data.service_name,
+        booking_date: data.booking_date,
+        booking_time: data.booking_time,
+        specialist_name: data.specialist_name,
+        cancel_url: data.cancel_url,
+      });
+    } catch (e) {
+      console.error("[booking.created] email send failed:", e);
+    }
     return { ok: true };
   });
