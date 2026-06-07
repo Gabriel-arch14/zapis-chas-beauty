@@ -44,6 +44,18 @@ function CancelPage() {
       const result = await cancelFn({ data: { token } });
       setBooking(result);
       setState("done");
+      // Only send the cancellation email on the first cancellation,
+      // not on idempotent re-hits.
+      if (!result.was_already_cancelled && result.client_email) {
+        sendBookingEmail({
+          eventType: "cancellation",
+          client_email: result.client_email,
+          client_name: result.client_name,
+          service_name: result.service_name ?? "",
+          booking_date: result.booking_date,
+          booking_time: result.booking_time,
+        });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Възникна грешка.");
       setState("error");
