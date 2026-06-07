@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Check, XCircle, AlertTriangle, Home, Loader2 } from "lucide-react";
 import { cancelBookingByToken, type CancelledBooking } from "@/lib/cancellation.functions";
+import { sendBookingEmail } from "@/lib/sendBookingEmail";
 import { formatDateBG } from "@/lib/booking";
 
 export const Route = createFileRoute("/cancel")({
