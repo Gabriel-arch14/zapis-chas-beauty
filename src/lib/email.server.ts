@@ -87,7 +87,7 @@ async function sendViaResend(payload: {
   subject: string;
   html: string;
 }): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = await getResendApiKey();
   if (!apiKey) {
     console.error("[email] RESEND_API_KEY is not set — skipping send");
     return;
