@@ -3,6 +3,7 @@
 // RESEND_API_KEY must be set as a Supabase secret.
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const STUDIO_EMAIL = Deno.env.get("STUDIO_EMAIL") ?? "inforuseva@gmail.com";
 const FROM = "Ruseva Nails <noreply@rusevanails.com>";
 
 const corsHeaders = {
