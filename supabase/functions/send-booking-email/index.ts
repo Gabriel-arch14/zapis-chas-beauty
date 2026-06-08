@@ -176,34 +176,38 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: FROM,
-        to: [payload.client_email],
-        subject,
-        html,
-      }),
-    });
-
-    const body = await res.text();
-    if (!res.ok) {
-      console.error(`[send-booking-email] Resend ${res.status}: ${body}`);
+    const clientRes = await sendResendEmail(payload.client_email, subject, html);
+    if (!clientRes.ok) {
+      console.error(`[send-booking-email] Resend client ${clientRes.status}: ${clientRes.body}`);
       return new Response(
-        JSON.stringify({ error: "Resend failed", status: res.status, body }),
+        JSON.stringify({ error: "Resend failed", status: clientRes.status, body: clientRes.body }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-
     console.log(`[send-booking-email] sent ${payload.eventType} to ${payload.client_email}`);
-    return new Response(JSON.stringify({ success: true, data: body }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+
+    let studioRes: { ok: boolean; status: number; body: string } | null = null;
+    if (payload.eventType === "confirmation") {
+      try {
+        studioRes = await sendResendEmail(
+          STUDIO_EMAIL,
+          "Нова резервация!",
+          studioNotificationHtml(payload),
+        );
+        if (!studioRes.ok) {
+          console.error(`[send-booking-email] Resend studio ${studioRes.status}: ${studioRes.body}`);
+        } else {
+          console.log(`[send-booking-email] studio notification sent to ${STUDIO_EMAIL}`);
+        }
+      } catch (e) {
+        console.error("[send-booking-email] studio notification error:", e);
+      }
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, client: clientRes.body, studio: studioRes?.body ?? null }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (e) {
     console.error("[send-booking-email] fetch error:", e);
     return new Response(JSON.stringify({ error: "Unexpected error" }), {
