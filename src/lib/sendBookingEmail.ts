@@ -4,6 +4,7 @@ export type BookingEmailPayload = {
   eventType: "confirmation" | "cancellation";
   client_email: string;
   client_name: string;
+  client_phone?: string;
   service_name: string;
   booking_date: string;
   booking_time: string;

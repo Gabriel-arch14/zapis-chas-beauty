@@ -184,6 +184,7 @@ function BookPage() {
         eventType: "confirmation",
         client_email: emailValue,
         client_name: parsed.data.client_name,
+        client_phone: parsed.data.client_phone,
         specialist_name: specialist?.name ?? "",
         service_name: selectedService?.name ?? "",
         booking_date: toDateKey(date),

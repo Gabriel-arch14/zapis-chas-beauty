@@ -3,6 +3,7 @@
 // RESEND_API_KEY must be set as a Supabase secret.
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const STUDIO_EMAIL = Deno.env.get("STUDIO_EMAIL") ?? "inforuseva@gmail.com";
 const FROM = "Ruseva Nails <noreply@rusevanails.com>";
 
 const corsHeaders = {
@@ -18,6 +19,7 @@ interface Payload {
   eventType: EventType;
   client_email: string;
   client_name: string;
+  client_phone?: string;
   service_name: string;
   booking_date: string;
   booking_time: string;
@@ -89,6 +91,38 @@ function cancellationHtml(d: Payload): string {
   </div></body></html>`;
 }
 
+function studioNotificationHtml(d: Payload): string {
+  const date = formatDateBG(d.booking_date);
+  const time = formatTime(d.booking_time);
+  return `<!doctype html><html lang="bg"><body style="font-family:Arial,sans-serif;background:#faf7f5;padding:24px;color:#3a2a35;">
+  <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px;border:1px solid #f0e6ea;">
+    <h1 style="color:#7a4a63;margin:0 0 16px;font-size:22px;">Нова резервация! ✨</h1>
+    <p>Получена е нова резервация през сайта:</p>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+      <tr><td style="padding:8px 0;color:#7a6770;">Клиент:</td><td style="padding:8px 0;"><strong>${escapeHtml(d.client_name)}</strong></td></tr>
+      <tr><td style="padding:8px 0;color:#7a6770;">Телефон:</td><td style="padding:8px 0;"><strong>${escapeHtml(d.client_phone ?? "—")}</strong></td></tr>
+      <tr><td style="padding:8px 0;color:#7a6770;">Имейл:</td><td style="padding:8px 0;"><strong>${escapeHtml(d.client_email)}</strong></td></tr>
+      <tr><td style="padding:8px 0;color:#7a6770;">Услуга:</td><td style="padding:8px 0;"><strong>${escapeHtml(d.service_name)}</strong></td></tr>
+      ${d.specialist_name ? `<tr><td style="padding:8px 0;color:#7a6770;">Специалист:</td><td style="padding:8px 0;"><strong>${escapeHtml(d.specialist_name)}</strong></td></tr>` : ""}
+      <tr><td style="padding:8px 0;color:#7a6770;">Дата:</td><td style="padding:8px 0;"><strong>${escapeHtml(date)}</strong></td></tr>
+      <tr><td style="padding:8px 0;color:#7a6770;">Час:</td><td style="padding:8px 0;"><strong>${escapeHtml(time)}</strong></td></tr>
+    </table>
+  </div></body></html>`;
+}
+
+async function sendResendEmail(to: string, subject: string, html: string): Promise<{ ok: boolean; status: number; body: string }> {
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+    },
+    body: JSON.stringify({ from: FROM, to: [to], subject, html }),
+  });
+  const body = await res.text();
+  return { ok: res.ok, status: res.status, body };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -142,34 +176,38 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: FROM,
-        to: [payload.client_email],
-        subject,
-        html,
-      }),
-    });
-
-    const body = await res.text();
-    if (!res.ok) {
-      console.error(`[send-booking-email] Resend ${res.status}: ${body}`);
+    const clientRes = await sendResendEmail(payload.client_email, subject, html);
+    if (!clientRes.ok) {
+      console.error(`[send-booking-email] Resend client ${clientRes.status}: ${clientRes.body}`);
       return new Response(
-        JSON.stringify({ error: "Resend failed", status: res.status, body }),
+        JSON.stringify({ error: "Resend failed", status: clientRes.status, body: clientRes.body }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-
     console.log(`[send-booking-email] sent ${payload.eventType} to ${payload.client_email}`);
-    return new Response(JSON.stringify({ success: true, data: body }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+
+    let studioRes: { ok: boolean; status: number; body: string } | null = null;
+    if (payload.eventType === "confirmation") {
+      try {
+        studioRes = await sendResendEmail(
+          STUDIO_EMAIL,
+          "Нова резервация!",
+          studioNotificationHtml(payload),
+        );
+        if (!studioRes.ok) {
+          console.error(`[send-booking-email] Resend studio ${studioRes.status}: ${studioRes.body}`);
+        } else {
+          console.log(`[send-booking-email] studio notification sent to ${STUDIO_EMAIL}`);
+        }
+      } catch (e) {
+        console.error("[send-booking-email] studio notification error:", e);
+      }
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, client: clientRes.body, studio: studioRes?.body ?? null }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (e) {
     console.error("[send-booking-email] fetch error:", e);
     return new Response(JSON.stringify({ error: "Unexpected error" }), {
