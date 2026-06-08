@@ -18,6 +18,7 @@ type EventType = "confirmation" | "cancellation";
 interface Payload {
   eventType: EventType;
   client_email: string;
+  client_name: string;
   client_phone?: string;
   service_name: string;
   booking_date: string;
