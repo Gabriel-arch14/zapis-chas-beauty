@@ -91,6 +91,38 @@ function cancellationHtml(d: Payload): string {
   </div></body></html>`;
 }
 
+function studioNotificationHtml(d: Payload): string {
+  const date = formatDateBG(d.booking_date);
+  const time = formatTime(d.booking_time);
+  return `<!doctype html><html lang="bg"><body style="font-family:Arial,sans-serif;background:#faf7f5;padding:24px;color:#3a2a35;">
+  <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px;border:1px solid #f0e6ea;">
+    <h1 style="color:#7a4a63;margin:0 0 16px;font-size:22px;">Нова резервация! ✨</h1>
+    <p>Получена е нова резервация през сайта:</p>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+      <tr><td style="padding:8px 0;color:#7a6770;">Клиент:</td><td style="padding:8px 0;"><strong>${escapeHtml(d.client_name)}</strong></td></tr>
+      <tr><td style="padding:8px 0;color:#7a6770;">Телефон:</td><td style="padding:8px 0;"><strong>${escapeHtml(d.client_phone ?? "—")}</strong></td></tr>
+      <tr><td style="padding:8px 0;color:#7a6770;">Имейл:</td><td style="padding:8px 0;"><strong>${escapeHtml(d.client_email)}</strong></td></tr>
+      <tr><td style="padding:8px 0;color:#7a6770;">Услуга:</td><td style="padding:8px 0;"><strong>${escapeHtml(d.service_name)}</strong></td></tr>
+      ${d.specialist_name ? `<tr><td style="padding:8px 0;color:#7a6770;">Специалист:</td><td style="padding:8px 0;"><strong>${escapeHtml(d.specialist_name)}</strong></td></tr>` : ""}
+      <tr><td style="padding:8px 0;color:#7a6770;">Дата:</td><td style="padding:8px 0;"><strong>${escapeHtml(date)}</strong></td></tr>
+      <tr><td style="padding:8px 0;color:#7a6770;">Час:</td><td style="padding:8px 0;"><strong>${escapeHtml(time)}</strong></td></tr>
+    </table>
+  </div></body></html>`;
+}
+
+async function sendResendEmail(to: string, subject: string, html: string): Promise<{ ok: boolean; status: number; body: string }> {
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+    },
+    body: JSON.stringify({ from: FROM, to: [to], subject, html }),
+  });
+  const body = await res.text();
+  return { ok: res.ok, status: res.status, body };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
